@@ -1,0 +1,143 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { toJsonList } from "@/lib/json";
+import { prisma } from "@/lib/prisma";
+import { requireAdmin, requireUser } from "@/lib/auth";
+import { setSettings } from "@/lib/settings";
+
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "")
+    .slice(0, 80);
+}
+
+export async function saveProduct(formData: FormData) {
+  const user = await requireUser();
+  if (!user) redirect("/admin/login");
+
+  const id = String(formData.get("id") ?? "");
+  const title = String(formData.get("title") ?? "").trim();
+  const slugRaw = String(formData.get("slug") ?? "").trim();
+  const slug = slugify(slugRaw || title);
+  if (!title || !slug) throw new Error("Title is required");
+
+  const canEditLinks = user.role === "ADMIN";
+  const existing = id ? await prisma.product.findUnique({ where: { id } }) : null;
+
+  const data = {
+    title,
+    slug,
+    shortDescription: String(formData.get("shortDescription") ?? ""),
+    description: String(formData.get("description") ?? ""),
+    priceInr: Number(formData.get("priceInr") || 0),
+    compareAtInr: formData.get("compareAtInr") ? Number(formData.get("compareAtInr")) : null,
+    imageUrl: String(formData.get("imageUrl") ?? ""),
+    ogImageUrl: String(formData.get("ogImageUrl") ?? ""),
+    prosJson: toJsonList(String(formData.get("pros") ?? "")),
+    consJson: toJsonList(String(formData.get("cons") ?? "")),
+    categoryId: String(formData.get("categoryId") ?? ""),
+    published: user.role === "ADMIN" ? formData.get("published") === "on" : false,
+    pinnedToBio: user.role === "ADMIN" ? formData.get("pinnedToBio") === "on" : (existing?.pinnedToBio ?? false),
+    amazonUrl: canEditLinks ? String(formData.get("amazonUrl") ?? "") : (existing?.amazonUrl ?? ""),
+    flipkartUrl: canEditLinks ? String(formData.get("flipkartUrl") ?? "") : (existing?.flipkartUrl ?? ""),
+    networkUrl: canEditLinks ? String(formData.get("networkUrl") ?? "") : (existing?.networkUrl ?? ""),
+    lastPriceCheckedAt: new Date(),
+  };
+
+  if (id) {
+    await prisma.product.update({ where: { id }, data });
+  } else {
+    await prisma.product.create({ data });
+  }
+
+  revalidatePath("/");
+  revalidatePath("/links");
+  revalidatePath("/admin/products");
+  redirect("/admin/products");
+}
+
+export async function deleteProduct(formData: FormData) {
+  const user = await requireAdmin();
+  if (!user) redirect("/admin");
+  const id = String(formData.get("id") ?? "");
+  await prisma.product.delete({ where: { id } });
+  revalidatePath("/admin/products");
+  redirect("/admin/products");
+}
+
+export async function savePost(formData: FormData) {
+  const user = await requireUser();
+  if (!user) redirect("/admin/login");
+  const id = String(formData.get("id") ?? "");
+  const title = String(formData.get("title") ?? "").trim();
+  const slug = slugify(String(formData.get("slug") ?? "") || title);
+  const status = user.role === "ADMIN" && formData.get("published") === "on" ? "PUBLISHED" : "DRAFT";
+  const data = {
+    title,
+    slug,
+    excerpt: String(formData.get("excerpt") ?? ""),
+    body: String(formData.get("body") ?? ""),
+    status,
+    authorId: user.id,
+  };
+  if (id) await prisma.post.update({ where: { id }, data });
+  else await prisma.post.create({ data });
+  revalidatePath("/blog");
+  redirect("/admin/posts");
+}
+
+export async function saveSettings(formData: FormData) {
+  const user = await requireAdmin();
+  if (!user) redirect("/admin");
+  await setSettings({
+    siteName: String(formData.get("siteName") ?? "CuratedPicks"),
+    tagline: String(formData.get("tagline") ?? ""),
+    disclosure: String(formData.get("disclosure") ?? ""),
+    adsenseClient: String(formData.get("adsenseClient") ?? ""),
+    instagramUrl: String(formData.get("instagramUrl") ?? ""),
+    facebookUrl: String(formData.get("facebookUrl") ?? ""),
+  });
+  const pages = ["affiliate", "privacy", "terms", "cookies"] as const;
+  for (const slug of pages) {
+    const title = String(formData.get(`pageTitle_${slug}`) ?? "");
+    const body = String(formData.get(`pageBody_${slug}`) ?? "");
+    if (title && body) {
+      await prisma.page.upsert({
+        where: { slug },
+        update: { title, body },
+        create: { slug, title, body },
+      });
+    }
+  }
+  revalidatePath("/");
+  redirect("/admin/settings");
+}
+
+export async function saveRedirect(formData: FormData) {
+  const user = await requireAdmin();
+  if (!user) redirect("/admin");
+  const fromPath = String(formData.get("fromPath") ?? "").trim();
+  const toPath = String(formData.get("toPath") ?? "").trim();
+  if (!fromPath || !toPath) throw new Error("Both paths required");
+  await prisma.redirect.create({ data: { fromPath, toPath } });
+  redirect("/admin/redirects");
+}
+
+export async function saveCategory(formData: FormData) {
+  const user = await requireAdmin();
+  if (!user) redirect("/admin");
+  const name = String(formData.get("name") ?? "").trim();
+  const slug = slugify(String(formData.get("slug") ?? "") || name);
+  const description = String(formData.get("description") ?? "");
+  await prisma.category.upsert({
+    where: { slug },
+    update: { name, description },
+    create: { name, slug, description },
+  });
+  redirect("/admin/categories");
+}

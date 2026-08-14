@@ -1,26 +1,159 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #e8edf3;
+  --surface: #f4f7fb;
+  --text: #141820;
+  --muted: #4a5564;
+  --faint: #6b7585;
+  --line: #c5cedb;
+  --accent: #ff4d2e;
+  --accent-hover: #e33d20;
+  --tube: #4aa3d9;
+  --success: #1f7a4d;
+  --success-soft: #d7efe3;
+  --danger: #b42318;
+  --danger-soft: #f8d7d4;
+  --star: #d97706;
+  --ink: #141820;
+  color-scheme: light;
+}
+
+html.dark {
+  --bg: #101318;
+  --surface: #181c24;
+  --text: #eef2f7;
+  --muted: #9aa3b2;
+  --faint: #6f7887;
+  --line: #2a3140;
+  --accent: #ff6a4d;
+  --accent-hover: #ff846d;
+  --tube: #7ec8ff;
+  --success: #4ade80;
+  --success-soft: #143024;
+  --danger: #f97066;
+  --danger-soft: #3a1816;
+  --star: #fbbf24;
+  --ink: #eef2f7;
+  color-scheme: dark;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-tube: var(--tube);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-star: var(--star);
+  --font-sans: var(--font-body);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+
+body::before {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+input,
+textarea,
+select {
+  background: var(--surface);
+  color: var(--text);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display), "Times New Roman", serif;
+  letter-spacing: -0.02em;
+  font-weight: 400;
+  text-wrap: balance;
+}
+
+.font-display {
+  font-family: var(--font-display), "Times New Roman", serif;
+  font-weight: 400;
+}
+
+.font-mono {
+  font-family: var(--font-body), system-ui, sans-serif;
+  letter-spacing: 0.04em;
+}
+
+.tube-bar {
+  background: linear-gradient(90deg, transparent, var(--tube), var(--accent), var(--tube), transparent);
+  block-size: 2px;
+}
+
+.ticket {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: 0 10px 30px rgb(16 19 24 / 0.08);
+}
+
+.ticket::before,
+.ticket::after {
+  content: "";
+  position: absolute;
+  top: -7px;
+  width: 14px;
+  height: 14px;
+  border-radius: 99px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+}
+
+.ticket::before {
+  left: 18px;
+}
+
+.ticket::after {
+  right: 18px;
+}
+
+.perforation {
+  background-image: radial-gradient(circle, var(--bg) 3px, transparent 3.5px);
+  background-size: 14px 10px;
+  background-repeat: repeat-x;
+  background-position: center;
+  height: 10px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--tube);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

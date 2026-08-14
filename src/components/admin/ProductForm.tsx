@@ -1,0 +1,139 @@
+import { deleteProduct, saveProduct } from "@/app/actions/admin";
+import { parseStringList } from "@/lib/json";
+import { instagramReply, productShareUrl, SOCIAL_SOURCES } from "@/lib/site";
+import { CopyButtons } from "./CopyButtons";
+
+type Category = { id: string; name: string };
+type Product = {
+  id: string;
+  slug: string;
+  title: string;
+  shortDescription: string;
+  description: string;
+  priceInr: number;
+  compareAtInr: number | null;
+  imageUrl: string;
+  ogImageUrl: string;
+  prosJson: string;
+  consJson: string;
+  amazonUrl: string;
+  flipkartUrl: string;
+  networkUrl: string;
+  published: boolean;
+  pinnedToBio: boolean;
+  categoryId: string;
+};
+
+export function ProductForm({
+  product,
+  categories,
+  canEditLinks,
+}: {
+  product?: Product;
+  categories: Category[];
+  canEditLinks: boolean;
+}) {
+  return (
+    <form action={saveProduct} className="max-w-2xl space-y-4">
+      {product ? <input type="hidden" name="id" value={product.id} /> : null}
+      <label className="block text-sm font-medium">
+        Title
+        <input name="title" defaultValue={product?.title} required className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
+      </label>
+      <label className="block text-sm font-medium">
+        Slug (URL)
+        <input name="slug" defaultValue={product?.slug} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
+      </label>
+      <label className="block text-sm font-medium">
+        Category
+        <select name="categoryId" defaultValue={product?.categoryId} className="mt-1 w-full rounded-xl border border-line px-3 py-2">
+          {categories.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="block text-sm font-medium">
+        Short pitch (2–4 sentences)
+        <textarea name="shortDescription" rows={3} defaultValue={product?.shortDescription} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
+      </label>
+      <label className="block text-sm font-medium">
+        Extra notes
+        <textarea name="description" rows={4} defaultValue={product?.description} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
+      </label>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <label className="block text-sm font-medium">
+          Price ₹
+          <input name="priceInr" type="number" step="0.01" defaultValue={product?.priceInr ?? 0} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
+        </label>
+        <label className="block text-sm font-medium">
+          Compare-at ₹
+          <input name="compareAtInr" type="number" step="0.01" defaultValue={product?.compareAtInr ?? ""} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
+        </label>
+      </div>
+      <label className="block text-sm font-medium">
+        Image URL
+        <input name="imageUrl" defaultValue={product?.imageUrl} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
+      </label>
+      <label className="block text-sm font-medium">
+        Share preview image URL (optional)
+        <input name="ogImageUrl" defaultValue={product?.ogImageUrl} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
+      </label>
+      <label className="block text-sm font-medium">
+        Pros (one per line)
+        <textarea name="pros" rows={4} defaultValue={product ? parseStringList(product.prosJson).join("\n") : ""} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
+      </label>
+      <label className="block text-sm font-medium">
+        Cons (one per line)
+        <textarea name="cons" rows={3} defaultValue={product ? parseStringList(product.consJson).join("\n") : ""} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
+      </label>
+      {canEditLinks ? (
+        <>
+          <label className="block text-sm font-medium">
+            Amazon.in affiliate URL
+            <input name="amazonUrl" defaultValue={product?.amazonUrl} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
+          </label>
+          <label className="block text-sm font-medium">
+            Flipkart affiliate URL
+            <input name="flipkartUrl" defaultValue={product?.flipkartUrl} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
+          </label>
+          <label className="block text-sm font-medium">
+            Network URL (Cuelinks / EarnKaro)
+            <input name="networkUrl" defaultValue={product?.networkUrl} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
+          </label>
+        </>
+      ) : (
+        <p className="text-sm text-muted">Only an admin can edit affiliate URLs.</p>
+      )}
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" name="published" defaultChecked={product?.published} />
+        Publish (live on the site)
+      </label>
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" name="pinnedToBio" defaultChecked={product?.pinnedToBio} />
+        Pin on /links (Instagram bio)
+      </label>
+      <button type="submit" className="rounded-full bg-gray-900 px-5 py-2 text-white">
+        Save
+      </button>
+      {product ? (
+        <div className="rounded-2xl border border-line bg-surface p-4">
+          <h3 className="font-medium">Copy for the comment reply</h3>
+          <p className="mt-2 break-all text-sm">{instagramReply(product.slug)}</p>
+          <CopyButtons
+            items={SOCIAL_SOURCES.map((source) => ({
+              label: source.label,
+              value: source.id === "ig" ? instagramReply(product.slug) : productShareUrl(product.slug, source.id),
+            }))}
+          />
+        </div>
+      ) : null}
+      {product && canEditLinks ? (
+        <button formAction={deleteProduct} name="id" value={product.id} className="text-sm text-danger">
+          Delete product
+        </button>
+      ) : null}
+    </form>
+  );
+}

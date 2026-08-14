@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("EDITOR") // ADMIN | EDITOR
+  posts        Post[]
+  createdAt    DateTime @default(now())
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String    @default("")
+  imageUrl    String    @default("")
+  products    Product[]
+  createdAt   DateTime  @default(now())
+}
+
+model Product {
+  id                 String    @id @default(cuid())
+  slug               String    @unique
+  title              String
+  shortDescription   String    @default("")
+  description        String    @default("")
+  priceInr           Float
+  compareAtInr       Float?
+  imageUrl           String    @default("")
+  ogImageUrl         String    @default("")
+  prosJson           String    @default("[]")
+  consJson           String    @default("[]")
+  featuresJson       String    @default("{}")
+  amazonUrl          String    @default("")
+  flipkartUrl        String    @default("")
+  networkUrl         String    @default("")
+  published          Boolean   @default(false)
+  pinnedToBio        Boolean   @default(false)
+  sortOrder          Int       @default(0)
+  lastPriceCheckedAt DateTime?
+  categoryId         String
+  category           Category  @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  clicks             Click[]
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+}
+
+model Post {
+  id         String   @id @default(cuid())
+  slug       String   @unique
+  title      String
+  excerpt    String   @default("")
+  body       String   @default("")
+  status     String   @default("DRAFT") // DRAFT | PUBLISHED
+  authorId   String
+  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Click {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  merchant  String
+  source    String   @default("direct")
+  referrer  String   @default("")
+  createdAt DateTime @default(now())
+
+  @@index([productId, createdAt])
+  @@index([source, createdAt])
+}
+
+model Subscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  source    String   @default("site")
+  createdAt DateTime @default(now())
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String   @default("general")
+  body      String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Redirect {
+  id       String @id @default(cuid())
+  fromPath String @unique
+  toPath   String
+}
+
+model Setting {
+  key   String @id
+  value String
+}
+
+model Page {
+  slug    String @id
+  title   String
+  body    String
+}
