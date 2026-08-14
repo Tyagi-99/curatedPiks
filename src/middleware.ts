@@ -7,7 +7,7 @@ export async function middleware(request: NextRequest) {
   if (pathname === "/admin/login") return NextResponse.next();
 
   const token = request.cookies.get("cp_session")?.value;
-  const secret = process.env.AUTH_SECRET;
+  const secret = process.env.AUTH_SECRET ?? "curatedpicks-change-this-auth-secret-32b";
   if (!token || !secret) {
     return NextResponse.redirect(new URL("/admin/login", request.url));
   }

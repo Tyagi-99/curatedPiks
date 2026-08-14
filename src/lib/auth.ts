@@ -1,6 +1,7 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
+import { AUTH_SECRET } from "./env";
 import { prisma } from "./prisma";
 
 export type SessionUser = {
@@ -13,9 +14,7 @@ export type SessionUser = {
 const COOKIE = "cp_session";
 
 function secret() {
-  const value = process.env.AUTH_SECRET;
-  if (!value) throw new Error("AUTH_SECRET is not set");
-  return new TextEncoder().encode(value);
+  return new TextEncoder().encode(AUTH_SECRET);
 }
 
 export async function hashPassword(password: string) {

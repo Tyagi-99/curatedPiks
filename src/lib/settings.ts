@@ -13,10 +13,14 @@ const DEFAULTS: Record<string, string> = {
 };
 
 export async function getSettings() {
-  const rows = await prisma.setting.findMany();
-  const map = { ...DEFAULTS };
-  for (const row of rows) map[row.key] = row.value;
-  return map;
+  try {
+    const rows = await prisma.setting.findMany();
+    const map = { ...DEFAULTS };
+    for (const row of rows) map[row.key] = row.value;
+    return map;
+  } catch {
+    return { ...DEFAULTS };
+  }
 }
 
 export async function getSetting(key: string) {

@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { Instrument_Serif, Manrope } from "next/font/google";
 import Script from "next/script";
+import { siteUrl } from "@/lib/env";
 import { getSettings } from "@/lib/settings";
 import "./globals.css";
+
+export const dynamic = "force-dynamic";
 
 const manrope = Manrope({
   variable: "--font-body",
@@ -23,7 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
       template: `%s — ${settings.siteName}`,
     },
     description: settings.tagline,
-    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+    metadataBase: new URL(siteUrl()),
   };
 }
 

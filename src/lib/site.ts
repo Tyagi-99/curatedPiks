@@ -1,6 +1,6 @@
-export function siteUrl() {
-  return (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
-}
+import { siteUrl } from "./env";
+
+export { siteUrl };
 
 export function productShareUrl(slug: string, source = "ig") {
   return `${siteUrl()}/p/${slug}?src=${encodeURIComponent(source)}`;
