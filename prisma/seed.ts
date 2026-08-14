@@ -2,8 +2,6 @@ import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { LEGAL_PAGES } from "../src/lib/legalPages";
 
-const prisma = new PrismaClient();
-
 const img = (id: string) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=1200&q=80`;
 
@@ -15,7 +13,7 @@ function searchLinks(query: string) {
   };
 }
 
-async function main() {
+export async function seedDatabase(prisma: PrismaClient) {
   const email = (process.env.ADMIN_EMAIL ?? "admin@curatedpicks.local").toLowerCase();
   const password = process.env.ADMIN_PASSWORD ?? "ChangeMe123!";
   const passwordHash = await bcrypt.hash(password, 12);
@@ -334,10 +332,18 @@ async function main() {
   console.log(`Seeded admin ${email} and ${products.length} products`);
 }
 
-main()
-  .then(() => prisma.$disconnect())
-  .catch(async (error) => {
-    console.error(error);
+async function main() {
+  const prisma = new PrismaClient();
+  try {
+    await seedDatabase(prisma);
+  } finally {
     await prisma.$disconnect();
+  }
+}
+
+if (process.argv[1]?.includes("seed")) {
+  main().catch((error) => {
+    console.error(error);
     process.exit(1);
   });
+}
