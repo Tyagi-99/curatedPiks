@@ -6,6 +6,7 @@ import { toJsonList } from "@/lib/json";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin, requireUser } from "@/lib/auth";
 import { setSettings } from "@/lib/settings";
+import { urlsForStore } from "@/lib/stores";
 
 function slugify(value: string) {
   return value
@@ -28,6 +29,16 @@ export async function saveProduct(formData: FormData) {
 
   const canEditLinks = user.role === "ADMIN";
   const existing = id ? await prisma.product.findUnique({ where: { id } }) : null;
+  const store = String(formData.get("store") ?? existing?.store ?? "amazon");
+  const affiliateUrl = canEditLinks
+    ? String(formData.get("affiliateUrl") ?? "")
+    : (existing?.affiliateUrl ?? "");
+  const storeUrls = canEditLinks ? urlsForStore(store, affiliateUrl) : {};
+  const specs: Record<string, string> = {};
+  for (const line of String(formData.get("specs") ?? "").split("\n")) {
+    const [label, ...rest] = line.split(":");
+    if (label && rest.length) specs[label.trim()] = rest.join(":").trim();
+  }
 
   const data = {
     title,
@@ -40,12 +51,14 @@ export async function saveProduct(formData: FormData) {
     ogImageUrl: String(formData.get("ogImageUrl") ?? ""),
     prosJson: toJsonList(String(formData.get("pros") ?? "")),
     consJson: toJsonList(String(formData.get("cons") ?? "")),
+    featuresJson: JSON.stringify(specs),
     categoryId: String(formData.get("categoryId") ?? ""),
     published: user.role === "ADMIN" ? formData.get("published") === "on" : false,
     pinnedToBio: user.role === "ADMIN" ? formData.get("pinnedToBio") === "on" : (existing?.pinnedToBio ?? false),
-    amazonUrl: canEditLinks ? String(formData.get("amazonUrl") ?? "") : (existing?.amazonUrl ?? ""),
-    flipkartUrl: canEditLinks ? String(formData.get("flipkartUrl") ?? "") : (existing?.flipkartUrl ?? ""),
-    networkUrl: canEditLinks ? String(formData.get("networkUrl") ?? "") : (existing?.networkUrl ?? ""),
+    popular: user.role === "ADMIN" ? formData.get("popular") === "on" : (existing?.popular ?? false),
+    sortOrder: Number(formData.get("sortOrder") || existing?.sortOrder || 0),
+    store,
+    ...storeUrls,
     lastPriceCheckedAt: new Date(),
   };
 

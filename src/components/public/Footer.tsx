@@ -42,8 +42,9 @@ export async function Footer() {
           </ul>
         </div>
       </div>
-      <div className="border-t border-line px-4 py-4 text-center font-mono text-[11px] uppercase tracking-[0.14em] text-faint">
-        © {new Date().getFullYear()} {settings.siteName} · not amazon · not flipkart
+      <div className="border-t border-line px-4 py-4 text-center text-xs text-faint">
+        © {new Date().getFullYear()} {settings.siteName}. Some links are affiliate links — I may earn a small
+        commission at no extra cost to you.
       </div>
     </footer>
   );

@@ -41,12 +41,27 @@ async function applySchema(client: PrismaClient) {
   }
 }
 
+async function ensureColumns(client: PrismaClient) {
+  const columns = (await client.$queryRawUnsafe(`PRAGMA table_info('Product')`)) as { name: string }[];
+  const names = new Set(columns.map((column) => column.name));
+  const needed = [
+    ["store", `ALTER TABLE "Product" ADD COLUMN "store" TEXT NOT NULL DEFAULT ''`],
+    ["affiliateUrl", `ALTER TABLE "Product" ADD COLUMN "affiliateUrl" TEXT NOT NULL DEFAULT ''`],
+    ["popular", `ALTER TABLE "Product" ADD COLUMN "popular" BOOLEAN NOT NULL DEFAULT false`],
+  ] as const;
+  for (const [name, statement] of needed) {
+    if (!names.has(name)) await client.$executeRawUnsafe(statement);
+  }
+}
+
 async function ensureDatabase(client: PrismaClient) {
   try {
     await client.setting.findFirst();
+    await ensureColumns(client);
     return;
   } catch {
     await applySchema(client);
+    await ensureColumns(client);
     await seedDatabase(client);
   }
 }

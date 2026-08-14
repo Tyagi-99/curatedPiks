@@ -21,6 +21,7 @@ export default async function ProductsAdminPage() {
           <thead className="border-b border-line text-faint">
             <tr>
               <th className="p-3">Product</th>
+              <th className="p-3">Store</th>
               <th className="p-3">Category</th>
               <th className="p-3">Price</th>
               <th className="p-3">Status</th>
@@ -32,6 +33,7 @@ export default async function ProductsAdminPage() {
             {products.map((product) => (
               <tr key={product.id} className="border-b border-line last:border-0">
                 <td className="p-3 font-medium">{product.title}</td>
+                <td className="p-3 text-muted">{product.store || "—"}</td>
                 <td className="p-3 text-muted">{product.category.name}</td>
                 <td className="p-3">{formatInr(product.priceInr)}</td>
                 <td className="p-3">

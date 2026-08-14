@@ -4,39 +4,50 @@ import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { getSettings } from "@/lib/settings";
 
 const links = [
-  { href: "/links", label: "Picks" },
+  { href: "/#shop", label: "Shop" },
   { href: "/c/tech-gadgets", label: "Tech" },
   { href: "/c/home-kitchen", label: "Home" },
   { href: "/c/health-fitness", label: "Fitness" },
   { href: "/c/fashion-accessories", label: "Fashion" },
-  { href: "/contact", label: "Contact" },
+  { href: "/c/beauty", label: "Beauty" },
 ];
 
 export async function Header() {
   const settings = await getSettings();
+  const instagram = settings.instagramUrl || "https://instagram.com/";
   return (
-    <header className="sticky top-0 z-40 bg-surface/85 backdrop-blur-md">
-      <div className="tube-bar" />
+    <header className="sticky top-0 z-40 border-b border-line bg-bg/85 backdrop-blur-md">
       <div className="relative mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
         <div className="flex items-center gap-2">
-          <MobileNav links={links} />
+          <MobileNav
+            links={[
+              ...links,
+              { href: instagram, label: "Instagram" },
+              { href: "/contact", label: "Contact" },
+            ]}
+          />
           <Link href="/" className="font-display text-2xl tracking-tight">
             {settings.siteName}
           </Link>
         </div>
         <nav className="hidden items-center gap-5 text-sm text-muted md:flex">
           {links.map((link) => (
-            <Link key={link.href} href={link.href} className="hover:text-accent">
+            <Link key={link.href} href={link.href} className="hover:text-text">
               {link.label}
             </Link>
           ))}
         </nav>
         <div className="flex items-center gap-2">
-          <ThemeToggle />
-          <Link
-            href="/links"
-            className="bg-accent px-3 py-1.5 text-sm font-semibold text-white hover:bg-accent-hover"
+          <ThemeToggle className="rounded-full" />
+          <a
+            href={instagram}
+            target="_blank"
+            rel="noreferrer"
+            className="hidden rounded-full border border-line px-3 py-1.5 text-sm sm:inline"
           >
+            Instagram
+          </a>
+          <Link href="/#shop" className="rounded-full bg-text px-3 py-1.5 text-sm font-semibold text-bg">
             Shop
           </Link>
         </div>

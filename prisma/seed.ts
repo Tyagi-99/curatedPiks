@@ -26,24 +26,29 @@ export async function seedDatabase(prisma: PrismaClient) {
 
   const categories = [
     {
-      name: "Tech & Gadgets",
+      name: "Tech",
       slug: "tech-gadgets",
       description: "Headphones, screens, and daily carry tech we actually use.",
     },
     {
-      name: "Home & Kitchen",
+      name: "Home Decor",
       slug: "home-kitchen",
-      description: "Coffee, cooking, and tools that earn their counter space.",
+      description: "Lamps, storage, and pieces that earn their counter space.",
     },
     {
-      name: "Health & Fitness",
+      name: "Fitness",
       slug: "health-fitness",
       description: "Mats, weights, and trackers for small-space workouts.",
     },
     {
-      name: "Fashion & Accessories",
+      name: "Fashion",
       slug: "fashion-accessories",
       description: "Watches, bags, and everyday carry that last.",
+    },
+    {
+      name: "Beauty",
+      slug: "beauty",
+      description: "Serums, color, and skin picks from the reels.",
     },
   ];
 
@@ -305,13 +310,87 @@ export async function seedDatabase(prisma: PrismaClient) {
       prosJson: JSON.stringify(["Full-grain leather", "RFID lining", "Slim profile"]),
       consJson: JSON.stringify(["Tight for a thick cash stack", "Needs occasional conditioning"]),
     },
+    {
+      slug: "vitamin-c-glow-serum",
+      title: "Vitamin C Glow Serum",
+      shortDescription: "10% Vitamin C, brightens in 4 weeks.",
+      description: "The bottle from the morning routine reel. Brightens without a sticky finish.",
+      priceInr: 649,
+      compareAtInr: 1099,
+      categoryId: bySlug["beauty"],
+      imageUrl: img("photo-1620916566398-39f1143ab7be"),
+      sortOrder: 1,
+      pinnedToBio: true,
+      ...searchLinks("vitamin c serum 10 percent"),
+      prosJson: JSON.stringify(["10% Vitamin C", "Brightens in 4 weeks", "Lightweight texture"]),
+      consJson: JSON.stringify(["Can sting on broken skin", "Needs SPF in the day"]),
+      featuresJson: JSON.stringify({ Size: "30ml", Actives: "10% Vitamin C", Finish: "Serum" }),
+    },
+    {
+      slug: "matte-lip-crayon-set",
+      title: "Matte Lip Crayon Set",
+      shortDescription: "Six transfer-proof nudes.",
+      description: "The set from the GRWM reel. Six nudes, transfer-proof enough for a commute.",
+      priceInr: 549,
+      compareAtInr: 1299,
+      categoryId: bySlug["beauty"],
+      imageUrl: img("photo-1586495777744-4413f21062fa"),
+      sortOrder: 2,
+      ...searchLinks("matte lip crayon set"),
+      prosJson: JSON.stringify(["Six nudes", "Transfer-proof", "Easy crayon format"]),
+      consJson: JSON.stringify(["Dries lips if you skip balm", "Nude range only"]),
+      featuresJson: JSON.stringify({ Shades: "6", Finish: "Matte", Wear: "Transfer-proof" }),
+    },
   ];
 
+  const storePlan: Record<string, { store: string; popular?: boolean }> = {
+    "airwave-pro-headphones": { store: "amazon", popular: true },
+    "pixelview-4k-monitor": { store: "flipkart" },
+    "swifttype-mechanical-keyboard": { store: "amazon" },
+    "novapad-ultra-tablet": { store: "flipkart" },
+    "brewmaster-elite-coffee": { store: "amazon" },
+    "aircrisp-pro-air-fryer": { store: "flipkart", popular: true },
+    "pureblend-pro-blender": { store: "meesho" },
+    "chefedge-knife-set": { store: "ajio" },
+    "zenflow-yoga-mat-pro": { store: "ajio" },
+    "powerlift-adjustable-dumbbells": { store: "amazon" },
+    "pulseband-fitness-tracker": { store: "flipkart" },
+    "flexband-resistance-set": { store: "meesho" },
+    "meridian-classic-watch": { store: "amazon", popular: true },
+    "voyager-carry-on-backpack": { store: "myntra" },
+    "luxframe-polarized-sunglasses": { store: "myntra" },
+    "heritage-leather-wallet": { store: "myntra" },
+    "vitamin-c-glow-serum": { store: "nykaa", popular: true },
+    "matte-lip-crayon-set": { store: "nykaa" },
+  };
+
+  function storeUrl(store: string, amazonUrl: string, flipkartUrl: string) {
+    if (store === "amazon") return amazonUrl;
+    if (store === "flipkart") return flipkartUrl;
+    if (store === "myntra") return amazonUrl.replace("amazon.in/s?k=", "myntra.com/");
+    if (store === "ajio") return amazonUrl.replace("https://www.amazon.in/s?k=", "https://www.ajio.com/search/?text=");
+    if (store === "nykaa") return amazonUrl.replace("https://www.amazon.in/s?k=", "https://www.nykaa.com/search/result/?q=");
+    if (store === "meesho") return amazonUrl.replace("https://www.amazon.in/s?k=", "https://www.meesho.com/search?q=");
+    return amazonUrl || flipkartUrl;
+  }
+
   for (const product of products) {
+    const plan = storePlan[product.slug] ?? { store: "amazon" };
+    const affiliateUrl = storeUrl(plan.store, product.amazonUrl, product.flipkartUrl);
+    const payload = {
+      ...product,
+      store: plan.store,
+      affiliateUrl,
+      amazonUrl: plan.store === "amazon" ? affiliateUrl : "",
+      flipkartUrl: plan.store === "flipkart" ? affiliateUrl : "",
+      networkUrl: plan.store !== "amazon" && plan.store !== "flipkart" ? affiliateUrl : "",
+      popular: Boolean(plan.popular),
+      published: true,
+    };
     await prisma.product.upsert({
       where: { slug: product.slug },
-      update: { ...product, published: true },
-      create: { ...product, published: true },
+      update: payload,
+      create: payload,
     });
   }
 

@@ -1,6 +1,7 @@
 import { deleteProduct, saveProduct } from "@/app/actions/admin";
 import { parseStringList } from "@/lib/json";
 import { instagramReply, productShareUrl, SOCIAL_SOURCES } from "@/lib/site";
+import { STORES } from "@/lib/stores";
 import { CopyButtons } from "./CopyButtons";
 
 type Category = { id: string; name: string };
@@ -19,10 +20,27 @@ type Product = {
   amazonUrl: string;
   flipkartUrl: string;
   networkUrl: string;
+  store?: string;
+  affiliateUrl?: string;
+  featuresJson?: string;
   published: boolean;
   pinnedToBio: boolean;
+  popular?: boolean;
+  sortOrder?: number;
   categoryId: string;
 };
+
+function specsText(raw?: string) {
+  if (!raw) return "";
+  try {
+    const value = JSON.parse(raw) as Record<string, string>;
+    return Object.entries(value)
+      .map(([label, item]) => `${label}: ${item}`)
+      .join("\n");
+  } catch {
+    return "";
+  }
+}
 
 export function ProductForm({
   product,
@@ -88,31 +106,45 @@ export function ProductForm({
         Cons (one per line)
         <textarea name="cons" rows={3} defaultValue={product ? parseStringList(product.consJson).join("\n") : ""} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
       </label>
+      <label className="block text-sm font-medium">
+        Specs (one per line, Label: value)
+        <textarea name="specs" rows={4} defaultValue={specsText(product?.featuresJson)} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
+      </label>
       {canEditLinks ? (
         <>
           <label className="block text-sm font-medium">
-            Amazon.in affiliate URL
-            <input name="amazonUrl" defaultValue={product?.amazonUrl} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
+            Store
+            <select name="store" defaultValue={product?.store || "amazon"} className="mt-1 w-full rounded-xl border border-line px-3 py-2">
+              {STORES.map((store) => (
+                <option key={store.id} value={store.id}>
+                  {store.label}
+                </option>
+              ))}
+            </select>
           </label>
           <label className="block text-sm font-medium">
-            Flipkart affiliate URL
-            <input name="flipkartUrl" defaultValue={product?.flipkartUrl} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
-          </label>
-          <label className="block text-sm font-medium">
-            Network URL (Cuelinks / EarnKaro)
-            <input name="networkUrl" defaultValue={product?.networkUrl} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
+            Affiliate URL
+            <input name="affiliateUrl" defaultValue={product?.affiliateUrl || product?.amazonUrl || product?.flipkartUrl || product?.networkUrl} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
           </label>
         </>
       ) : (
         <p className="text-sm text-muted">Only an admin can edit affiliate URLs.</p>
       )}
+      <label className="block text-sm font-medium">
+        Display order
+        <input name="sortOrder" type="number" defaultValue={product?.sortOrder ?? 0} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
+      </label>
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" name="published" defaultChecked={product?.published} />
         Publish (live on the site)
       </label>
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" name="pinnedToBio" defaultChecked={product?.pinnedToBio} />
-        Pin on /links (Instagram bio)
+        Featured product
+      </label>
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" name="popular" defaultChecked={product?.popular} />
+        Popular
       </label>
       <button type="submit" className="rounded-full bg-gray-900 px-5 py-2 text-white">
         Save

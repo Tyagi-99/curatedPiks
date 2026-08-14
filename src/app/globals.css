@@ -3,40 +3,40 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --bg: #e8edf3;
-  --surface: #f4f7fb;
-  --text: #141820;
-  --muted: #4a5564;
-  --faint: #6b7585;
-  --line: #c5cedb;
-  --accent: #ff4d2e;
-  --accent-hover: #e33d20;
-  --tube: #4aa3d9;
+  --bg: #f7f6f3;
+  --surface: #ffffff;
+  --text: #111111;
+  --muted: #5c5c5c;
+  --faint: #8a8a8a;
+  --line: #e6e4de;
+  --accent: #111111;
+  --accent-hover: #2a2a2a;
+  --tube: #6b6b6b;
   --success: #1f7a4d;
   --success-soft: #d7efe3;
   --danger: #b42318;
   --danger-soft: #f8d7d4;
   --star: #d97706;
-  --ink: #141820;
+  --ink: #111111;
   color-scheme: light;
 }
 
 html.dark {
-  --bg: #101318;
-  --surface: #181c24;
-  --text: #eef2f7;
-  --muted: #9aa3b2;
-  --faint: #6f7887;
-  --line: #2a3140;
-  --accent: #ff6a4d;
-  --accent-hover: #ff846d;
-  --tube: #7ec8ff;
+  --bg: #0b0b0b;
+  --surface: #141414;
+  --text: #f4f4f4;
+  --muted: #a3a3a3;
+  --faint: #737373;
+  --line: #2a2a2a;
+  --accent: #f4f4f4;
+  --accent-hover: #ffffff;
+  --tube: #a3a3a3;
   --success: #4ade80;
   --success-soft: #143024;
   --danger: #f97066;
   --danger-soft: #3a1816;
   --star: #fbbf24;
-  --ink: #eef2f7;
+  --ink: #f4f4f4;
   color-scheme: dark;
 }
 
@@ -105,15 +105,32 @@ h3 {
 }
 
 .tube-bar {
-  background: linear-gradient(90deg, transparent, var(--tube), var(--accent), var(--tube), transparent);
-  block-size: 2px;
+  background: var(--line);
+  block-size: 1px;
+}
+
+.lift-card {
+  transition: transform 220ms ease, box-shadow 220ms ease;
+}
+
+.lift-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px rgb(17 17 17 / 0.08);
+}
+
+.img-zoom {
+  transition: transform 500ms ease;
+}
+
+.group:hover .img-zoom {
+  transform: scale(1.05);
 }
 
 .ticket {
   position: relative;
   background: var(--surface);
   border: 1px solid var(--line);
-  box-shadow: 0 10px 30px rgb(16 19 24 / 0.08);
+  box-shadow: 0 10px 30px rgb(16 19 24 / 0.06);
 }
 
 .ticket::before,

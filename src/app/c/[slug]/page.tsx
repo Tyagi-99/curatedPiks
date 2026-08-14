@@ -32,7 +32,7 @@ export default async function CategoryPage({ params }: Props) {
         <p className="text-sm text-tube">Category</p>
         <h1 className="mt-2 text-5xl leading-[0.92]">{category.name}</h1>
         <p className="mt-3 max-w-2xl text-muted">{category.description}</p>
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {category.products.map((product) => (
             <ProductCard key={product.id} product={product} source="category" />
           ))}

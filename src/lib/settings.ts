@@ -2,11 +2,11 @@ import { prisma } from "./prisma";
 
 const DEFAULTS: Record<string, string> = {
   siteName: "CuratedPicks",
-  tagline: "We shortlist products worth buying — then send you to Amazon or Flipkart.",
+  tagline: "Buy all the products you've seen in my Instagram videos.",
   disclosure:
-    "We may earn a commission if you buy through our Amazon or Flipkart links. You pay the same price.",
+    "Some links are affiliate links — I may earn a small commission at no extra cost to you.",
   adsenseClient: "",
-  instagramUrl: "",
+  instagramUrl: "https://instagram.com/",
   facebookUrl: "",
   contactEmail: "hello@curatedpicks.com",
   whatsappUrl: "",

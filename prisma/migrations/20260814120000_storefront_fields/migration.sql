@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "Product" ADD COLUMN "store" TEXT NOT NULL DEFAULT '';
+ALTER TABLE "Product" ADD COLUMN "affiliateUrl" TEXT NOT NULL DEFAULT '';
+ALTER TABLE "Product" ADD COLUMN "popular" BOOLEAN NOT NULL DEFAULT false;
