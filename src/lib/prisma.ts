@@ -63,6 +63,23 @@ async function ensureColumns(client: PrismaClient) {
   for (const [name, statement] of needed) {
     if (!names.has(name)) await client.$executeRawUnsafe(statement);
   }
+
+  try {
+    const postColumns = (await client.$queryRawUnsafe(`PRAGMA table_info('Post')`)) as { name: string }[];
+    const postNames = new Set(postColumns.map((column) => column.name));
+    if (postNames.size === 0) return;
+    const postNeeded = [
+      ["coverImageUrl", `ALTER TABLE "Post" ADD COLUMN "coverImageUrl" TEXT NOT NULL DEFAULT ''`],
+      ["metaTitle", `ALTER TABLE "Post" ADD COLUMN "metaTitle" TEXT NOT NULL DEFAULT ''`],
+      ["metaDescription", `ALTER TABLE "Post" ADD COLUMN "metaDescription" TEXT NOT NULL DEFAULT ''`],
+      ["publishedAt", `ALTER TABLE "Post" ADD COLUMN "publishedAt" DATETIME`],
+    ] as const;
+    for (const [name, statement] of postNeeded) {
+      if (!postNames.has(name)) await client.$executeRawUnsafe(statement);
+    }
+  } catch {
+    /* Post table not ready yet */
+  }
 }
 
 async function ensureDatabase(client: PrismaClient) {

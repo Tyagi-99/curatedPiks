@@ -18,6 +18,9 @@ export async function Footer() {
               <Link href="/links">All picks</Link>
             </li>
             <li>
+              <Link href="/blog">Blog</Link>
+            </li>
+            <li>
               <Link href="/about">About</Link>
             </li>
             <li>

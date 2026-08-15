@@ -104,18 +104,44 @@ export async function savePost(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const title = String(formData.get("title") ?? "").trim();
   const slug = slugify(String(formData.get("slug") ?? "") || title);
-  const status = user.role === "ADMIN" && formData.get("published") === "on" ? "PUBLISHED" : "DRAFT";
+  if (!title || !slug) throw new Error("Title is required");
+  const existing = id ? await prisma.post.findUnique({ where: { id } }) : null;
+  const publish = user.role === "ADMIN" && formData.get("published") === "on";
+  const status = publish ? "PUBLISHED" : "DRAFT";
+  const publishedAt = publish ? (existing?.publishedAt ?? new Date()) : (existing?.publishedAt ?? null);
   const data = {
     title,
     slug,
     excerpt: String(formData.get("excerpt") ?? ""),
     body: String(formData.get("body") ?? ""),
+    coverImageUrl: String(formData.get("coverImageUrl") ?? ""),
+    metaTitle: String(formData.get("metaTitle") ?? ""),
+    metaDescription: String(formData.get("metaDescription") ?? ""),
     status,
+    publishedAt,
     authorId: user.id,
   };
   if (id) await prisma.post.update({ where: { id }, data });
   else await prisma.post.create({ data });
   revalidatePath("/blog");
+  revalidatePath(`/blog/${slug}`);
+  revalidatePath("/sitemap.xml");
+  revalidatePath("/admin/posts");
+  redirect("/admin/posts");
+}
+
+export async function deletePost(formData: FormData) {
+  const user = await requireAdmin();
+  if (!user) redirect("/admin");
+  const id = String(formData.get("id") ?? "");
+  const post = await prisma.post.findUnique({ where: { id } });
+  if (post) {
+    await prisma.post.delete({ where: { id } });
+    revalidatePath("/blog");
+    revalidatePath(`/blog/${post.slug}`);
+    revalidatePath("/sitemap.xml");
+  }
+  revalidatePath("/admin/posts");
   redirect("/admin/posts");
 }
 

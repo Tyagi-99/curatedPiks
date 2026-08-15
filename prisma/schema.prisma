@@ -66,16 +66,20 @@ model Product {
 }
 
 model Post {
-  id         String   @id @default(cuid())
-  slug       String   @unique
-  title      String
-  excerpt    String   @default("")
-  body       String   @default("")
-  status     String   @default("DRAFT") // DRAFT | PUBLISHED
-  authorId   String
-  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id              String    @id @default(cuid())
+  slug            String    @unique
+  title           String
+  excerpt         String    @default("")
+  body            String    @default("")
+  coverImageUrl   String    @default("")
+  metaTitle       String    @default("")
+  metaDescription String    @default("")
+  status          String    @default("DRAFT") // DRAFT | PUBLISHED
+  publishedAt     DateTime?
+  authorId        String
+  author          User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 }
 
 model Click {

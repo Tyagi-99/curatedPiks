@@ -64,6 +64,30 @@ export function productJsonLd(input: {
   return data;
 }
 
+export function articleJsonLd(input: {
+  headline: string;
+  description: string;
+  path: string;
+  datePublished?: Date | null;
+  dateModified?: Date | null;
+  image?: string;
+  publisherName: string;
+}) {
+  const data: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: input.headline,
+    description: input.description,
+    mainEntityOfPage: `${siteUrl()}${input.path}`,
+    author: { "@type": "Organization", name: input.publisherName },
+    publisher: { "@type": "Organization", name: input.publisherName, url: siteUrl() },
+  };
+  if (input.image) data.image = input.image.startsWith("http") ? input.image : `${siteUrl()}${input.image}`;
+  if (input.datePublished) data.datePublished = input.datePublished.toISOString();
+  if (input.dateModified) data.dateModified = input.dateModified.toISOString();
+  return data;
+}
+
 export function itemListJsonLd(name: string, items: { name: string; path: string }[]) {
   return {
     "@context": "https://schema.org",

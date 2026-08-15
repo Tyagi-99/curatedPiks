@@ -10,6 +10,7 @@ const links = [
   { href: "/c/health-fitness", label: "Fitness" },
   { href: "/c/fashion-accessories", label: "Fashion" },
   { href: "/c/beauty", label: "Beauty" },
+  { href: "/blog", label: "Blog" },
 ];
 
 export async function Header() {
