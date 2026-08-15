@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { LEGAL_PAGES } from "../src/lib/legalPages";
+import { EDITORIAL_BY_SLUG } from "./editorialSeed";
 
 const img = (id: string) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=1200&q=80`;
@@ -377,8 +378,13 @@ export async function seedDatabase(prisma: PrismaClient) {
   for (const product of products) {
     const plan = storePlan[product.slug] ?? { store: "amazon" };
     const affiliateUrl = storeUrl(plan.store, product.amazonUrl, product.flipkartUrl);
+    const editorial = EDITORIAL_BY_SLUG[product.slug];
+    if (!editorial) {
+      throw new Error(`Missing editorial overlay for ${product.slug}`);
+    }
     const payload = {
       ...product,
+      ...editorial,
       store: plan.store,
       affiliateUrl,
       amazonUrl: plan.store === "amazon" ? affiliateUrl : "",
@@ -386,6 +392,7 @@ export async function seedDatabase(prisma: PrismaClient) {
       networkUrl: plan.store !== "amazon" && plan.store !== "flipkart" ? affiliateUrl : "",
       popular: Boolean(plan.popular),
       published: true,
+      lastPriceCheckedAt: new Date("2026-08-14T00:00:00.000Z"),
     };
     await prisma.product.upsert({
       where: { slug: product.slug },
