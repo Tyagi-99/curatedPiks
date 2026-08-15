@@ -3,6 +3,7 @@ import { parseStringList } from "@/lib/json";
 import { instagramReply, productShareUrl, SOCIAL_SOURCES } from "@/lib/site";
 import { STORES } from "@/lib/stores";
 import { CopyButtons } from "./CopyButtons";
+import { ImageField } from "./ImageField";
 
 type Category = { id: string; name: string };
 type Product = {
@@ -130,14 +131,20 @@ export function ProductForm({
           <input name="compareAtInr" type="number" step="0.01" defaultValue={product?.compareAtInr ?? ""} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
         </label>
       </div>
-      <label className="block text-sm font-medium">
-        Image URL
-        <input name="imageUrl" defaultValue={product?.imageUrl} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
-      </label>
-      <label className="block text-sm font-medium">
-        Share preview image URL (optional)
-        <input name="ogImageUrl" defaultValue={product?.ogImageUrl} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
-      </label>
+      <ImageField
+        key={`image-${product?.id ?? "new"}`}
+        name="imageUrl"
+        label="Product image"
+        defaultValue={product?.imageUrl}
+        hint="Paste a direct https image URL, or upload a file. Best: 4:5 portrait (1200 × 1500 px). JPG or WebP, PNG also fine. Under 5 MB. Cards crop to 4:5, so avoid a wide landscape shot."
+      />
+      <ImageField
+        key={`og-${product?.id ?? "new"}`}
+        name="ogImageUrl"
+        label="Share preview image (optional)"
+        defaultValue={product?.ogImageUrl}
+        hint="Used on WhatsApp / Instagram link previews. Best: 1.91:1 (1200 × 630 px), JPG or WebP, under 5 MB. Leave empty to reuse the product image."
+      />
       <label className="block text-sm font-medium">
         Pros (one per line)
         <textarea name="pros" rows={4} defaultValue={product ? parseStringList(product.prosJson).join("\n") : ""} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
