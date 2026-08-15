@@ -8,16 +8,19 @@ function databaseUrl() {
   const configured = process.env.DATABASE_URL;
   if (configured && !configured.startsWith("file:")) return configured;
 
-  const bundled = path.join(process.cwd(), "prisma", "dev.db");
+  const bundled = [
+    path.join(process.cwd(), "prisma", "dev.db"),
+    path.join(process.cwd(), "prisma", "prisma", "dev.db"),
+  ].find((file) => existsSync(file));
   if (process.env.VERCEL) {
     const dest = "/tmp/curatedpicks.db";
-    if (existsSync(bundled)) {
+    if (bundled) {
       copyFileSync(bundled, dest);
     }
     return `file:${dest}`;
   }
 
-  return configured ?? `file:${bundled}`;
+  return configured ?? `file:${bundled ?? path.join(process.cwd(), "prisma", "dev.db")}`;
 }
 
 const globalForPrisma = globalThis as unknown as {
@@ -48,6 +51,14 @@ async function ensureColumns(client: PrismaClient) {
     ["store", `ALTER TABLE "Product" ADD COLUMN "store" TEXT NOT NULL DEFAULT ''`],
     ["affiliateUrl", `ALTER TABLE "Product" ADD COLUMN "affiliateUrl" TEXT NOT NULL DEFAULT ''`],
     ["popular", `ALTER TABLE "Product" ADD COLUMN "popular" BOOLEAN NOT NULL DEFAULT false`],
+    ["brand", `ALTER TABLE "Product" ADD COLUMN "brand" TEXT NOT NULL DEFAULT ''`],
+    ["quickVerdict", `ALTER TABLE "Product" ADD COLUMN "quickVerdict" TEXT NOT NULL DEFAULT ''`],
+    ["whyFeatured", `ALTER TABLE "Product" ADD COLUMN "whyFeatured" TEXT NOT NULL DEFAULT ''`],
+    ["highlightsJson", `ALTER TABLE "Product" ADD COLUMN "highlightsJson" TEXT NOT NULL DEFAULT '[]'`],
+    ["bestForJson", `ALTER TABLE "Product" ADD COLUMN "bestForJson" TEXT NOT NULL DEFAULT '[]'`],
+    ["notForJson", `ALTER TABLE "Product" ADD COLUMN "notForJson" TEXT NOT NULL DEFAULT '[]'`],
+    ["finalVerdict", `ALTER TABLE "Product" ADD COLUMN "finalVerdict" TEXT NOT NULL DEFAULT ''`],
+    ["editorialNotes", `ALTER TABLE "Product" ADD COLUMN "editorialNotes" TEXT NOT NULL DEFAULT ''`],
   ] as const;
   for (const [name, statement] of needed) {
     if (!names.has(name)) await client.$executeRawUnsafe(statement);

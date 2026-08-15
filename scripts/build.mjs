@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
 
-process.env.DATABASE_URL ||= "file:./prisma/dev.db";
+process.env.DATABASE_URL ||= "file:./dev.db";
 process.env.AUTH_SECRET ||= "curatedpicks-change-this-auth-secret-32b";
 
 function run(command) {
