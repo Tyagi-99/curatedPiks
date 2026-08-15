@@ -1,5 +1,13 @@
-export const AUTH_SECRET =
-  process.env.AUTH_SECRET ?? "curatedpicks-change-this-auth-secret-32b";
+function requiredSecret() {
+  const value = process.env.AUTH_SECRET?.trim();
+  if (value && !value.includes("change-this")) return value;
+  if (process.env.VERCEL) {
+    throw new Error("AUTH_SECRET must be set in Vercel project settings.");
+  }
+  return value || "curatedpicks-local-dev-only-auth-secret-32b";
+}
+
+export const AUTH_SECRET = requiredSecret();
 
 export function siteUrl() {
   const explicit = process.env.NEXT_PUBLIC_SITE_URL;
