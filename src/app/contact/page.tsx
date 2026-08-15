@@ -3,7 +3,11 @@ import { SiteShell } from "@/components/public/SiteShell";
 import { submitContact } from "@/app/actions/public";
 import { getSettings } from "@/lib/settings";
 
-export const metadata: Metadata = { title: "Contact" };
+export const metadata: Metadata = {
+  title: "Contact",
+  description: "Suggest a product, report a broken link, or ask a question.",
+  alternates: { canonical: "/contact" },
+};
 
 export default async function ContactPage() {
   const settings = await getSettings();
@@ -33,12 +37,7 @@ export default async function ContactPage() {
               <p className="text-xs uppercase tracking-wide text-faint">WhatsApp</p>
               <p className="mt-1 font-medium">Chat with us</p>
             </a>
-          ) : (
-            <div className="border border-dashed border-line bg-surface p-4">
-              <p className="text-xs uppercase tracking-wide text-faint">WhatsApp</p>
-              <p className="mt-1 text-sm text-muted">Coming soon</p>
-            </div>
-          )}
+          ) : null}
         </div>
 
         <form action={submitContact} className="mt-10 space-y-4">

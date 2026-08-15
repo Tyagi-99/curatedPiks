@@ -2,15 +2,13 @@ export const LEGAL_PAGES = [
   {
     slug: "affiliate",
     title: "Affiliate disclosure",
-    body: `This page is the only place CuratedPicks explains how we are paid when you buy a product we recommend. Please read it before you use a buy button.
+    body: `This page explains how CuratedPicks is paid when you buy a product we recommend. Please read it before you use a buy button. A short version of this disclosure also appears on product pages and in the site footer.
 
 ## Who we are
 CuratedPicks is an independent product-recommendation website operated from India. We are not Amazon, Flipkart, or any other retailer. We do not sell the products on this site. When you tap a buy button, you leave our website and complete the purchase on that retailer’s own store, under that retailer’s terms, pricing, delivery, and returns.
 
 ## How we may be paid
 CuratedPicks takes part in the Amazon Associates Programme (amazon.in) and similar affiliate programmes operated by Flipkart and other networks. If you follow a buy link from this site and later buy that product — or another product — during the retailer’s tracking window, we may receive a commission from the retailer or network. You do not pay a higher price because you came through our link.
-
-We only place those programmes on this page so you can see the full picture. We do not repeat commission language on product pages, the homepage, or in our everyday copy.
 
 ## What that means for you
 Our buy buttons send you to Amazon, Flipkart, or another store we have listed. Those sites may use their own cookies and tracking so they can credit a sale to us. That tracking is run by the retailer, not by a shopping cart on CuratedPicks.

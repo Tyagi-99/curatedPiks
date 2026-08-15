@@ -3,7 +3,7 @@ import Link from "next/link";
 import { SiteShell } from "@/components/public/SiteShell";
 import { prisma } from "@/lib/prisma";
 
-export const metadata: Metadata = { title: "Blog" };
+export const metadata: Metadata = { title: "Blog", alternates: { canonical: "/blog" } };
 
 export default async function BlogPage() {
   const posts = await prisma.post.findMany({

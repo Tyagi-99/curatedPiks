@@ -23,6 +23,14 @@ type Product = {
   store?: string;
   affiliateUrl?: string;
   featuresJson?: string;
+  brand?: string;
+  quickVerdict?: string;
+  whyFeatured?: string;
+  highlightsJson?: string;
+  bestForJson?: string;
+  notForJson?: string;
+  finalVerdict?: string;
+  editorialNotes?: string;
   published: boolean;
   pinnedToBio: boolean;
   popular?: boolean;
@@ -79,6 +87,38 @@ export function ProductForm({
       <label className="block text-sm font-medium">
         Extra notes
         <textarea name="description" rows={4} defaultValue={product?.description} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
+      </label>
+      <label className="block text-sm font-medium">
+        Brand
+        <input name="brand" defaultValue={product?.brand} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
+      </label>
+      <label className="block text-sm font-medium">
+        Quick verdict
+        <textarea name="quickVerdict" rows={2} defaultValue={product?.quickVerdict} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
+      </label>
+      <label className="block text-sm font-medium">
+        Why we featured it
+        <textarea name="whyFeatured" rows={4} defaultValue={product?.whyFeatured} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
+      </label>
+      <label className="block text-sm font-medium">
+        Highlights (one per line)
+        <textarea name="highlights" rows={4} defaultValue={product ? parseStringList(product.highlightsJson ?? "[]").join("\n") : ""} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
+      </label>
+      <label className="block text-sm font-medium">
+        Who should consider it (one per line)
+        <textarea name="bestFor" rows={3} defaultValue={product ? parseStringList(product.bestForJson ?? "[]").join("\n") : ""} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
+      </label>
+      <label className="block text-sm font-medium">
+        Who should skip it (one per line)
+        <textarea name="notFor" rows={3} defaultValue={product ? parseStringList(product.notForJson ?? "[]").join("\n") : ""} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
+      </label>
+      <label className="block text-sm font-medium">
+        Final verdict
+        <textarea name="finalVerdict" rows={2} defaultValue={product?.finalVerdict} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
+      </label>
+      <label className="block text-sm font-medium">
+        Editorial notes (admin only)
+        <textarea name="editorialNotes" rows={2} defaultValue={product?.editorialNotes} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
       </label>
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="block text-sm font-medium">

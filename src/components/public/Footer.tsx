@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DISCLOSURE_COPY } from "@/lib/editorial";
 import { getSettings } from "@/lib/settings";
 
 export async function Footer() {
@@ -18,6 +19,9 @@ export async function Footer() {
             </li>
             <li>
               <Link href="/about">About</Link>
+            </li>
+            <li>
+              <Link href="/how-we-review">How we review</Link>
             </li>
             <li>
               <Link href="/contact">Contact</Link>
@@ -43,8 +47,7 @@ export async function Footer() {
         </div>
       </div>
       <div className="border-t border-line px-4 py-4 text-center text-xs text-faint">
-        © {new Date().getFullYear()} {settings.siteName}. Some links are affiliate links — I may earn a small
-        commission at no extra cost to you.
+        © {new Date().getFullYear()} {settings.siteName}. {settings.disclosure || DISCLOSURE_COPY}
       </div>
     </footer>
   );

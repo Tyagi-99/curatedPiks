@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 export const metadata: Metadata = {
   title: "Shop the reels",
   description: "Every product featured in the videos, with a direct buy button.",
+  alternates: { canonical: "/links" },
 };
 
 export default async function LinksPage() {

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ctaLabel } from "@/lib/editorial";
 import { discountPercent, formatInr } from "@/lib/money";
 import { resolveStore } from "@/lib/stores";
 
@@ -97,7 +98,7 @@ export function ProductCard({
               rel="sponsored nofollow noopener noreferrer"
               className={`mt-auto block rounded-full px-4 py-3 text-center text-sm font-semibold ${store.buttonClass}`}
             >
-              Buy on {store.label}
+              {ctaLabel(store.label, store.id)}
             </a>
           </>
         ) : (

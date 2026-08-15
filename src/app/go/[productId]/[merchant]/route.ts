@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { resolveStore, STORES } from "@/lib/stores";
+import { isHttpUrl } from "@/lib/urls";
 
 const MERCHANTS = [...STORES.map((store) => store.id), "network"] as const;
 
@@ -24,7 +25,7 @@ export async function GET(
     product.networkUrl ||
     resolved.url;
 
-  if (!target) return NextResponse.redirect(new URL("/", request.url));
+  if (!target || !isHttpUrl(target)) return NextResponse.redirect(new URL("/", request.url));
 
   const src = new URL(request.url).searchParams.get("src") ?? "direct";
   await prisma.click.create({

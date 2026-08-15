@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Instrument_Serif, Manrope } from "next/font/google";
 import Script from "next/script";
 import { siteUrl } from "@/lib/env";
+import { organizationJsonLd, websiteJsonLd } from "@/lib/json-ld";
 import { getSettings } from "@/lib/settings";
 import "./globals.css";
 
@@ -27,10 +28,26 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description: settings.tagline,
     metadataBase: new URL(siteUrl()),
+    openGraph: {
+      siteName: settings.siteName,
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+    },
   };
 }
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const settings = await getSettings();
+  const jsonLd = [
+    organizationJsonLd({
+      siteName: settings.siteName,
+      instagramUrl: settings.instagramUrl,
+      facebookUrl: settings.facebookUrl,
+    }),
+    websiteJsonLd({ siteName: settings.siteName, tagline: settings.tagline }),
+  ];
   return (
     <html
       lang="en"
@@ -42,6 +59,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Script id="theme-init" strategy="beforeInteractive">
           {`(function(){try{var t=localStorage.getItem("theme");var d=t==="dark"||(t!=="light"&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(d)document.documentElement.classList.add("dark");}catch(e){}})();`}
         </Script>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         {children}
       </body>
     </html>

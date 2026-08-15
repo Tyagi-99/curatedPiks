@@ -8,7 +8,11 @@ type Props = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const post = await prisma.post.findUnique({ where: { slug } });
-  return { title: post?.title ?? "Post" };
+  return {
+    title: post?.title ?? "Post",
+    description: post?.excerpt || undefined,
+    alternates: { canonical: `/blog/${slug}` },
+  };
 }
 
 export default async function PostPage({ params }: Props) {

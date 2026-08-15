@@ -1,3 +1,4 @@
+import { ctaLabel } from "@/lib/editorial";
 import { resolveStore } from "@/lib/stores";
 
 type Props = {
@@ -41,7 +42,7 @@ export function BuyButtons({
           rel="sponsored nofollow noopener noreferrer"
           className={`block rounded-full px-5 py-3.5 text-center text-base font-semibold ${resolved.buttonClass}`}
         >
-          Buy on {resolved.label}
+          {ctaLabel(resolved.label, resolved.id)}
         </a>
       </div>
     </div>

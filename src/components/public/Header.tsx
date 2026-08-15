@@ -14,7 +14,7 @@ const links = [
 
 export async function Header() {
   const settings = await getSettings();
-  const instagram = settings.instagramUrl || "https://instagram.com/";
+  const instagram = settings.instagramUrl;
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-bg/85 backdrop-blur-md">
       <div className="relative mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
@@ -22,7 +22,8 @@ export async function Header() {
           <MobileNav
             links={[
               ...links,
-              { href: instagram, label: "Instagram" },
+              ...(instagram ? [{ href: instagram, label: "Instagram" }] : []),
+              { href: "/how-we-review", label: "How we review" },
               { href: "/contact", label: "Contact" },
             ]}
           />
@@ -39,14 +40,16 @@ export async function Header() {
         </nav>
         <div className="flex items-center gap-2">
           <ThemeToggle className="rounded-full" />
-          <a
-            href={instagram}
-            target="_blank"
-            rel="noreferrer"
-            className="hidden rounded-full border border-line px-3 py-1.5 text-sm sm:inline"
-          >
-            Instagram
-          </a>
+          {instagram ? (
+            <a
+              href={instagram}
+              target="_blank"
+              rel="noreferrer"
+              className="hidden rounded-full border border-line px-3 py-1.5 text-sm sm:inline"
+            >
+              Instagram
+            </a>
+          ) : null}
           <Link href="/#shop" className="rounded-full bg-text px-3 py-1.5 text-sm font-semibold text-bg">
             Shop
           </Link>

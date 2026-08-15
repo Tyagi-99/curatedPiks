@@ -1,8 +1,13 @@
+import type { Metadata } from "next";
 import { ProductCard } from "@/components/public/ProductCard";
 import { ShopGrid } from "@/components/public/ShopGrid";
 import { SiteShell } from "@/components/public/SiteShell";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 export default async function HomePage() {
   const [settings, products] = await Promise.all([
@@ -19,7 +24,8 @@ export default async function HomePage() {
   const recent = [...products].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).slice(0, 3);
   const popular = products.filter((product) => product.popular).slice(0, 3);
   const popularFallback = popular.length > 0 ? popular : products.slice(0, 3);
-  const instagram = settings.instagramUrl || "https://instagram.com/";
+  const instagram = settings.instagramUrl;
+  const facebook = settings.facebookUrl;
 
   return (
     <SiteShell>
@@ -34,14 +40,16 @@ export default async function HomePage() {
             <a href="#shop" className="rounded-full bg-text px-5 py-3 text-sm font-semibold text-bg">
               Shop the collection
             </a>
-            <a
-              href={instagram}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-full border border-line px-5 py-3 text-sm"
-            >
-              Instagram
-            </a>
+            {instagram ? (
+              <a
+                href={instagram}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 rounded-full border border-line px-5 py-3 text-sm"
+              >
+                Instagram
+              </a>
+            ) : null}
           </div>
         </div>
       </section>
@@ -81,6 +89,45 @@ export default async function HomePage() {
             ))}
           </div>
         </section>
+
+        <section className="rounded-3xl border border-line bg-surface p-6 sm:p-8">
+          <h2 className="text-3xl">How we choose products</h2>
+          <p className="mt-3 max-w-2xl text-muted">
+            Picks start from the reels. We only publish a page when the listed specs and trade-offs are clear
+            enough to write an honest take. Affiliate terms do not decide the shortlist.
+          </p>
+          <a href="/how-we-review" className="mt-4 inline-block text-sm font-medium underline">
+            Read how we review
+          </a>
+        </section>
+
+        {instagram || facebook ? (
+          <section>
+            <h2 className="text-3xl">Follow us</h2>
+            <div className="mt-4 flex flex-wrap gap-3">
+              {instagram ? (
+                <a
+                  href={instagram}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-full border border-line px-5 py-3 text-sm"
+                >
+                  Instagram
+                </a>
+              ) : null}
+              {facebook ? (
+                <a
+                  href={facebook}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-full border border-line px-5 py-3 text-sm"
+                >
+                  Facebook
+                </a>
+              ) : null}
+            </div>
+          </section>
+        ) : null}
       </div>
     </SiteShell>
   );

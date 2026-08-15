@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProductCard } from "@/components/public/ProductCard";
 import { SiteShell } from "@/components/public/SiteShell";
+import { itemListJsonLd } from "@/lib/json-ld";
 import { prisma } from "@/lib/prisma";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -9,7 +10,11 @@ type Props = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const category = await prisma.category.findUnique({ where: { slug } });
-  return { title: category?.name ?? "Category" };
+  return {
+    title: category?.name ?? "Category",
+    description: category?.description || `Products in ${category?.name ?? "this category"}.`,
+    alternates: { canonical: `/c/${slug}` },
+  };
 }
 
 export default async function CategoryPage({ params }: Props) {
@@ -26,8 +31,14 @@ export default async function CategoryPage({ params }: Props) {
   });
   if (!category) notFound();
 
+  const jsonLd = itemListJsonLd(
+    category.name,
+    category.products.map((product) => ({ name: product.title, path: `/p/${product.slug}` })),
+  );
+
   return (
     <SiteShell>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="mx-auto max-w-6xl px-4 py-12">
         <p className="text-sm text-tube">Category</p>
         <h1 className="mt-2 text-5xl leading-[0.92]">{category.name}</h1>

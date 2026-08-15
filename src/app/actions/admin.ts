@@ -40,13 +40,26 @@ export async function saveProduct(formData: FormData) {
     if (label && rest.length) specs[label.trim()] = rest.join(":").trim();
   }
 
+  const priceInr = Number(formData.get("priceInr") || 0);
+  const compareAtInr = formData.get("compareAtInr") ? Number(formData.get("compareAtInr")) : null;
+  const priceChanged =
+    !existing || existing.priceInr !== priceInr || existing.compareAtInr !== compareAtInr;
+
   const data = {
     title,
     slug,
     shortDescription: String(formData.get("shortDescription") ?? ""),
     description: String(formData.get("description") ?? ""),
-    priceInr: Number(formData.get("priceInr") || 0),
-    compareAtInr: formData.get("compareAtInr") ? Number(formData.get("compareAtInr")) : null,
+    brand: String(formData.get("brand") ?? ""),
+    quickVerdict: String(formData.get("quickVerdict") ?? ""),
+    whyFeatured: String(formData.get("whyFeatured") ?? ""),
+    highlightsJson: toJsonList(String(formData.get("highlights") ?? "")),
+    bestForJson: toJsonList(String(formData.get("bestFor") ?? "")),
+    notForJson: toJsonList(String(formData.get("notFor") ?? "")),
+    finalVerdict: String(formData.get("finalVerdict") ?? ""),
+    editorialNotes: String(formData.get("editorialNotes") ?? ""),
+    priceInr,
+    compareAtInr,
     imageUrl: String(formData.get("imageUrl") ?? ""),
     ogImageUrl: String(formData.get("ogImageUrl") ?? ""),
     prosJson: toJsonList(String(formData.get("pros") ?? "")),
@@ -59,7 +72,7 @@ export async function saveProduct(formData: FormData) {
     sortOrder: Number(formData.get("sortOrder") || existing?.sortOrder || 0),
     store,
     ...storeUrls,
-    lastPriceCheckedAt: new Date(),
+    lastPriceCheckedAt: priceChanged ? new Date() : (existing?.lastPriceCheckedAt ?? null),
   };
 
   if (id) {
@@ -70,7 +83,9 @@ export async function saveProduct(formData: FormData) {
 
   revalidatePath("/");
   revalidatePath("/links");
+  revalidatePath(`/p/${slug}`);
   revalidatePath("/admin/products");
+  revalidatePath("/sitemap.xml");
   redirect("/admin/products");
 }
 

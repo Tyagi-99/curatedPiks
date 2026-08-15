@@ -1,12 +1,13 @@
+import { DISCLOSURE_COPY } from "./editorial";
 import { prisma } from "./prisma";
+import { realSocialUrl } from "./urls";
 
 const DEFAULTS: Record<string, string> = {
   siteName: "CuratedPicks",
   tagline: "Buy all the products you've seen in my Instagram videos.",
-  disclosure:
-    "Some links are affiliate links — I may earn a small commission at no extra cost to you.",
+  disclosure: DISCLOSURE_COPY,
   adsenseClient: "",
-  instagramUrl: "https://instagram.com/",
+  instagramUrl: "",
   facebookUrl: "",
   contactEmail: "hello@curatedpicks.com",
   whatsappUrl: "",
@@ -17,6 +18,8 @@ export async function getSettings() {
     const rows = await prisma.setting.findMany();
     const map = { ...DEFAULTS };
     for (const row of rows) map[row.key] = row.value;
+    map.instagramUrl = realSocialUrl(map.instagramUrl) ?? "";
+    map.facebookUrl = realSocialUrl(map.facebookUrl) ?? "";
     return map;
   } catch {
     return { ...DEFAULTS };
