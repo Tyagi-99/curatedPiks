@@ -5,8 +5,9 @@ import { redirect } from "next/navigation";
 import { toJsonList } from "@/lib/json";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin, requireUser } from "@/lib/auth";
-import { setSettings } from "@/lib/settings";
+import { setSettings, SITE_NAME } from "@/lib/settings";
 import { urlsForStore } from "@/lib/stores";
+import { isHttpUrl } from "@/lib/urls";
 
 function slugify(value: string) {
   return value
@@ -29,10 +30,29 @@ export async function saveProduct(formData: FormData) {
 
   const canEditLinks = user.role === "ADMIN";
   const existing = id ? await prisma.product.findUnique({ where: { id } }) : null;
+  if (id && !existing) throw new Error("That product no longer exists.");
+
+  // A blank or stale category id used to reach Postgres and come back as an
+  // unhandled foreign key error (HTTP 500).
+  const categoryId = String(formData.get("categoryId") ?? "").trim();
+  if (!categoryId) {
+    throw new Error("Pick a category. Create one in Categories first if the list is empty.");
+  }
+  const category = await prisma.category.findUnique({ where: { id: categoryId } });
+  if (!category) throw new Error("That category no longer exists.");
+
+  // Slugs are unique; catching it here gives a real message instead of P2002.
+  const slugOwner = await prisma.product.findUnique({ where: { slug }, select: { id: true } });
+  if (slugOwner && slugOwner.id !== id) {
+    throw new Error(`The URL "${slug}" is already used by another product. Choose a different slug.`);
+  }
+
+  const affiliateUrlRaw = String(formData.get("affiliateUrl") ?? "").trim();
+  if (canEditLinks && affiliateUrlRaw && !isHttpUrl(affiliateUrlRaw)) {
+    throw new Error("The affiliate URL must start with http:// or https://.");
+  }
   const store = String(formData.get("store") ?? existing?.store ?? "amazon");
-  const affiliateUrl = canEditLinks
-    ? String(formData.get("affiliateUrl") ?? "")
-    : (existing?.affiliateUrl ?? "");
+  const affiliateUrl = canEditLinks ? affiliateUrlRaw : (existing?.affiliateUrl ?? "");
   const storeUrls = canEditLinks ? urlsForStore(store, affiliateUrl) : {};
   const specs: Record<string, string> = {};
   for (const line of String(formData.get("specs") ?? "").split("\n")) {
@@ -65,7 +85,7 @@ export async function saveProduct(formData: FormData) {
     prosJson: toJsonList(String(formData.get("pros") ?? "")),
     consJson: toJsonList(String(formData.get("cons") ?? "")),
     featuresJson: JSON.stringify(specs),
-    categoryId: String(formData.get("categoryId") ?? ""),
+    categoryId,
     published: user.role === "ADMIN" ? formData.get("published") === "on" : false,
     pinnedToBio: user.role === "ADMIN" ? formData.get("pinnedToBio") === "on" : (existing?.pinnedToBio ?? false),
     popular: user.role === "ADMIN" ? formData.get("popular") === "on" : (existing?.popular ?? false),
@@ -93,7 +113,15 @@ export async function deleteProduct(formData: FormData) {
   const user = await requireAdmin();
   if (!user) redirect("/admin");
   const id = String(formData.get("id") ?? "");
-  await prisma.product.delete({ where: { id } });
+  // Deleting an already-deleted row threw P2025 as an unhandled 500.
+  const product = id ? await prisma.product.findUnique({ where: { id } }) : null;
+  if (product) {
+    await prisma.product.delete({ where: { id } });
+    revalidatePath("/");
+    revalidatePath("/links");
+    revalidatePath(`/p/${product.slug}`);
+    revalidatePath("/sitemap.xml");
+  }
   revalidatePath("/admin/products");
   redirect("/admin/products");
 }
@@ -106,6 +134,11 @@ export async function savePost(formData: FormData) {
   const slug = slugify(String(formData.get("slug") ?? "") || title);
   if (!title || !slug) throw new Error("Title is required");
   const existing = id ? await prisma.post.findUnique({ where: { id } }) : null;
+  if (id && !existing) throw new Error("That post no longer exists.");
+  const slugOwner = await prisma.post.findUnique({ where: { slug }, select: { id: true } });
+  if (slugOwner && slugOwner.id !== id) {
+    throw new Error(`The URL "${slug}" is already used by another post. Choose a different slug.`);
+  }
   const publish = user.role === "ADMIN" && formData.get("published") === "on";
   const status = publish ? "PUBLISHED" : "DRAFT";
   const publishedAt = publish ? (existing?.publishedAt ?? new Date()) : (existing?.publishedAt ?? null);
@@ -149,7 +182,7 @@ export async function saveSettings(formData: FormData) {
   const user = await requireAdmin();
   if (!user) redirect("/admin");
   await setSettings({
-    siteName: String(formData.get("siteName") ?? "CuratedPicks"),
+    siteName: String(formData.get("siteName") ?? SITE_NAME),
     tagline: String(formData.get("tagline") ?? ""),
     disclosure: String(formData.get("disclosure") ?? ""),
     adsenseClient: String(formData.get("adsenseClient") ?? ""),
@@ -178,8 +211,32 @@ export async function saveRedirect(formData: FormData) {
   const fromPath = String(formData.get("fromPath") ?? "").trim();
   const toPath = String(formData.get("toPath") ?? "").trim();
   if (!fromPath || !toPath) throw new Error("Both paths required");
-  await prisma.redirect.create({ data: { fromPath, toPath } });
+  if (!fromPath.startsWith("/") || !toPath.startsWith("/")) {
+    throw new Error("Both paths must start with / (for example /old-slug).");
+  }
+  if (fromPath === toPath) throw new Error("A path cannot redirect to itself.");
+  // fromPath is unique: create() threw P2002 as a 500 when re-adding a path.
+  await prisma.redirect.upsert({
+    where: { fromPath },
+    update: { toPath },
+    create: { fromPath, toPath },
+  });
   redirect("/admin/redirects");
+}
+
+// Message.read was written by nothing, so the dashboard's "Unread mail" count
+// always equalled the total message count.
+export async function markMessageRead(formData: FormData) {
+  const user = await requireAdmin();
+  if (!user) redirect("/admin");
+  const id = String(formData.get("id") ?? "");
+  if (id) {
+    const message = await prisma.message.findUnique({ where: { id } });
+    if (message) await prisma.message.update({ where: { id }, data: { read: true } });
+  }
+  revalidatePath("/admin/messages");
+  revalidatePath("/admin");
+  redirect("/admin/messages");
 }
 
 export async function saveCategory(formData: FormData) {
@@ -187,6 +244,9 @@ export async function saveCategory(formData: FormData) {
   if (!user) redirect("/admin");
   const name = String(formData.get("name") ?? "").trim();
   const slug = slugify(String(formData.get("slug") ?? "") || name);
+  // slugify strips everything non-alphanumeric, so a name like "!!!" yields ""
+  // and would have written a category with an empty slug.
+  if (!name || !slug) throw new Error("Give the category a name using letters or numbers.");
   const description = String(formData.get("description") ?? "");
   await prisma.category.upsert({
     where: { slug },

@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
@@ -47,30 +48,42 @@ export async function clearSession() {
   jar.delete(COOKIE);
 }
 
-export async function getSession(): Promise<SessionUser | null> {
+// cache() keeps this to a single cookie read + single query per request even
+// though the layout and the page both ask for the session.
+export const getSession = cache(async (): Promise<SessionUser | null> => {
   const jar = await cookies();
   const token = jar.get(COOKIE)?.value;
   if (!token) return null;
+
+  let id: string;
   try {
     const { payload } = await jwtVerify(token, secret());
-    if (
-      typeof payload.id === "string" &&
-      typeof payload.email === "string" &&
-      typeof payload.name === "string" &&
-      (payload.role === "ADMIN" || payload.role === "EDITOR")
-    ) {
-      return {
-        id: payload.id,
-        email: payload.email,
-        name: payload.name,
-        role: payload.role,
-      };
-    }
-    return null;
+    if (typeof payload.id !== "string") return null;
+    id = payload.id;
   } catch {
     return null;
   }
-}
+
+  // The token is valid for 14 days, so trusting its claims would keep deleted
+  // or demoted accounts authorised until it expired. Re-read the user instead
+  // and treat the database as the source of truth for identity and role.
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: { id: true, email: true, name: true, role: true },
+    });
+    if (!user) return null;
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role === "ADMIN" ? "ADMIN" : "EDITOR",
+    };
+  } catch {
+    // Fail closed: no session rather than an unauthenticated admin surface.
+    return null;
+  }
+});
 
 export async function requireUser() {
   const user = await getSession();

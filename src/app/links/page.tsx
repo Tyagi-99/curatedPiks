@@ -22,9 +22,11 @@ export default async function LinksPage() {
         <p className="text-sm text-muted">Instagram bio</p>
         <h1 className="mt-2 text-5xl leading-[1.05]">Shop the reels</h1>
         <p className="mt-4 max-w-xl text-muted">Buy the products you saw in the videos.</p>
-        <div className="mt-8">
+        <section className="mt-8">
+          {/* Product cards are h3; this keeps the outline from jumping h1 -> h3. */}
+          <h2 className="sr-only">All products</h2>
           <ShopGrid products={products} source="bio" />
-        </div>
+        </section>
       </div>
     </SiteShell>
   );

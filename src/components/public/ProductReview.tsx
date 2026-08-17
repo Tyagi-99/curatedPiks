@@ -80,8 +80,15 @@ export function ProductReview({
 
       <div className="mt-4 overflow-hidden rounded-3xl border border-line bg-surface">
         {images[0] ? (
+          // This is the LCP element on a product page.
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={images[0]} alt={product.title} className="aspect-[4/5] w-full object-cover sm:aspect-[5/4]" />
+          <img
+            src={images[0]}
+            alt={product.title}
+            fetchPriority="high"
+            decoding="async"
+            className="aspect-[4/5] w-full object-cover sm:aspect-[5/4]"
+          />
         ) : (
           <div className="grid aspect-[4/5] place-items-center font-display text-7xl text-faint">∎</div>
         )}
@@ -90,7 +97,14 @@ export function ProductReview({
         <div className="mt-3 flex gap-2 overflow-x-auto">
           {images.map((image) => (
             // eslint-disable-next-line @next/next/no-img-element
-            <img key={image} src={image} alt="" className="h-20 w-16 rounded-xl object-cover" />
+            <img
+              key={image}
+              src={image}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              className="h-20 w-16 rounded-xl object-cover"
+            />
           ))}
         </div>
       ) : null}

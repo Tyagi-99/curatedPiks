@@ -1,11 +1,24 @@
+/**
+ * Every retailer shares one buy-button treatment. Retailer brand colours
+ * (Amazon orange, Nykaa pink, Flipkart blue, …) made the grid look like a
+ * collection of other people's logos; the retailer is still named in the
+ * button label and the badge, so nothing is lost by dropping the colour.
+ *
+ * Defined as tokens in globals.css so both themes stay in sync.
+ */
+export const STORE_BUTTON_CLASS = "bg-cta text-cta-ink hover:bg-cta-hover";
+
+/** Neutral pill: readable, and it no longer competes with the gold CTA. */
+export const STORE_BADGE_CLASS = "bg-surface/90 text-text border border-line backdrop-blur-sm";
+
 export const STORES = [
-  { id: "amazon", label: "Amazon", badgeClass: "bg-[#FF9900] text-black", buttonClass: "bg-[#FF9900] text-black hover:bg-[#e68a00]" },
-  { id: "flipkart", label: "Flipkart", badgeClass: "bg-[#2874F0] text-white", buttonClass: "bg-[#2874F0] text-white hover:bg-[#1c5dc9]" },
-  { id: "myntra", label: "Myntra", badgeClass: "bg-[#E91E63] text-white", buttonClass: "bg-[#E91E63] text-white hover:bg-[#c2185b]" },
-  { id: "ajio", label: "Ajio", badgeClass: "bg-[#2C4152] text-white", buttonClass: "bg-[#2C4152] text-white hover:bg-[#1f2e3a]" },
-  { id: "nykaa", label: "Nykaa", badgeClass: "bg-[#FC2779] text-white", buttonClass: "bg-[#FC2779] text-white hover:bg-[#e01e6a]" },
-  { id: "meesho", label: "Meesho", badgeClass: "bg-[#F43397] text-white", buttonClass: "bg-[#F43397] text-white hover:bg-[#d91f82]" },
-  { id: "custom", label: "Store", badgeClass: "bg-[#111111] text-white", buttonClass: "bg-[#111111] text-white hover:bg-black" },
+  { id: "amazon", label: "Amazon", badgeClass: STORE_BADGE_CLASS, buttonClass: STORE_BUTTON_CLASS },
+  { id: "flipkart", label: "Flipkart", badgeClass: STORE_BADGE_CLASS, buttonClass: STORE_BUTTON_CLASS },
+  { id: "myntra", label: "Myntra", badgeClass: STORE_BADGE_CLASS, buttonClass: STORE_BUTTON_CLASS },
+  { id: "ajio", label: "Ajio", badgeClass: STORE_BADGE_CLASS, buttonClass: STORE_BUTTON_CLASS },
+  { id: "nykaa", label: "Nykaa", badgeClass: STORE_BADGE_CLASS, buttonClass: STORE_BUTTON_CLASS },
+  { id: "meesho", label: "Meesho", badgeClass: STORE_BADGE_CLASS, buttonClass: STORE_BUTTON_CLASS },
+  { id: "custom", label: "Store", badgeClass: STORE_BADGE_CLASS, buttonClass: STORE_BUTTON_CLASS },
 ] as const;
 
 export type StoreId = (typeof STORES)[number]["id"];

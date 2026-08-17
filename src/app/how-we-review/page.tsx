@@ -4,7 +4,7 @@ import { SiteShell } from "@/components/public/SiteShell";
 
 export const metadata: Metadata = {
   title: "How we review",
-  description: "How CuratedPicks discovers, researches, and updates product pages — and how affiliate links do not decide the shortlist.",
+  description: "How DealDuniya discovers, researches, and updates product pages — and how affiliate links do not decide the shortlist.",
   alternates: { canonical: "/how-we-review" },
 };
 
@@ -19,7 +19,7 @@ const STEPS = [
   },
   {
     title: "3. Feature comparison",
-    body: "We compare the listed features with other products already on CuratedPicks in the same category. Alternatives on a page are other published picks, not invented competitors.",
+    body: "We compare the listed features with other products already on DealDuniya in the same category. Alternatives on a page are other published picks, not invented competitors.",
   },
   {
     title: "4. Value assessment",
@@ -35,7 +35,7 @@ const STEPS = [
   },
   {
     title: "7. Price and availability checks",
-    body: "Prices on CuratedPicks are entered by hand and can change. Every product page says to check the retailer for the latest price. The “last updated” line is the last time we edited that price.",
+    body: "Prices on DealDuniya are entered by hand and can change. Every product page says to check the retailer for the latest price. The “last updated” line is the last time we edited that price.",
   },
   {
     title: "8. Editorial updates",
@@ -43,7 +43,7 @@ const STEPS = [
   },
   {
     title: "9. Corrections",
-    body: "If something on a page is wrong, use the contact form or email hello@curatedpicks.com. Affiliate relationships do not decide what we recommend, and they do not stop us correcting a page.",
+    body: "If something on a page is wrong, use the contact form or email hello@dealduniya.in. Affiliate relationships do not decide what we recommend, and they do not stop us correcting a page.",
   },
 ];
 
@@ -52,7 +52,7 @@ export default function HowWeReviewPage() {
     <SiteShell>
       <article className="mx-auto max-w-2xl px-4 py-12">
         <p className="text-sm text-tube">Methodology</p>
-        <h1 className="mt-2 text-5xl leading-[1.05]">How CuratedPicks reviews and curates products</h1>
+        <h1 className="mt-2 text-5xl leading-[1.05]">How DealDuniya reviews and curates products</h1>
         <p className="mt-4 text-muted">
           Affiliate programmes do not decide the shortlist. A retailer paying a commission is not a reason to
           feature a product — or to hide a limitation.

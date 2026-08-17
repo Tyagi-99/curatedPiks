@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ProductCard } from "@/components/public/ProductCard";
 import { ShopGrid } from "@/components/public/ShopGrid";
 import { SiteShell } from "@/components/public/SiteShell";
+import { organizationJsonLd, websiteJsonLd } from "@/lib/json-ld";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
 
@@ -27,8 +28,20 @@ export default async function HomePage() {
   const instagram = settings.instagramUrl;
   const facebook = settings.facebookUrl;
 
+  // Organization + WebSite markup was already written and tested in json-ld.ts
+  // but never rendered, so the homepage published no structured data at all.
+  const jsonLd = [
+    organizationJsonLd({
+      siteName: settings.siteName,
+      instagramUrl: settings.instagramUrl,
+      facebookUrl: settings.facebookUrl,
+    }),
+    websiteJsonLd({ siteName: settings.siteName, tagline: settings.tagline }),
+  ];
+
   return (
     <SiteShell>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <section className="border-b border-line">
         <div className="mx-auto max-w-6xl px-4 py-14 sm:py-20">
           <p className="text-sm tracking-wide text-muted">Curated from my reels</p>
