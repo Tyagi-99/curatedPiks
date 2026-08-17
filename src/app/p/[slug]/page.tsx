@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProductReview } from "@/components/public/ProductReview";
@@ -12,10 +13,20 @@ type Props = {
   searchParams: Promise<{ src?: string }>;
 };
 
+// generateMetadata and the page body both need the product; cache() makes that
+// one query per request instead of two.
+const getProduct = cache((slug: string) =>
+  prisma.product.findUnique({ where: { slug }, include: { category: true } }),
+);
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const product = await prisma.product.findUnique({ where: { slug } });
-  if (!product || !product.published) return { title: "Product" };
+  const product = await getProduct(slug);
+  // Unpublished and missing products both render as 404s, so keep them out of
+  // the index rather than letting a placeholder title get crawled.
+  if (!product || !product.published) {
+    return { title: "Product", robots: { index: false, follow: false } };
+  }
   const store = resolveStore(product);
   const title = `${product.title} — ${store.label}`;
   const description = product.quickVerdict || product.shortDescription;
@@ -45,10 +56,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const { src } = await searchParams;
   const source = src || "direct";
-  const product = await prisma.product.findUnique({
-    where: { slug },
-    include: { category: true },
-  });
+  const product = await getProduct(slug);
   if (!product || !product.published) notFound();
 
   const related = await prisma.product.findMany({

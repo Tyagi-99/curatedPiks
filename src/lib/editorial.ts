@@ -1,5 +1,5 @@
 export const DISCLOSURE_COPY =
-  "Some links on CuratedPicks are affiliate links. If you purchase through them, we may earn a commission at no additional cost to you.";
+  "Some links on DealDuniya are affiliate links. If you purchase through them, we may earn a commission at no additional cost to you.";
 
 export const SAMPLE_EDITORIAL_NOTE =
   "SAMPLE DEMO COPY — replace before publishing a real product.";

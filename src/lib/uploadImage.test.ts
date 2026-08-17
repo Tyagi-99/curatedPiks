@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { extensionForType, sanitizeBaseName, validateImageFile } from "./uploadImage.ts";
+import {
+  extensionForType,
+  isSafeUploadFilename,
+  sanitizeBaseName,
+  validateImageFile,
+} from "./uploadImage.ts";
 
 test("accepts jpg png webp only", () => {
   assert.equal(extensionForType("image/jpeg"), "jpg");
@@ -19,4 +24,13 @@ test("validateImageFile rejects large and empty files", () => {
   assert.equal(validateImageFile({ type: "image/gif", size: 1200 }), "Use a JPG, PNG, or WebP image.");
   assert.equal(validateImageFile({ type: "image/jpeg", size: 0 }), "That file is empty.");
   assert.equal(validateImageFile({ type: "image/jpeg", size: 6 * 1024 * 1024 }), "Keep the image under 5 MB.");
+});
+
+test("isSafeUploadFilename blocks traversal and odd names", () => {
+  assert.equal(isSafeUploadFilename("1755000000-airwave.jpg"), true);
+  assert.equal(isSafeUploadFilename("../../etc/passwd"), false);
+  assert.equal(isSafeUploadFilename("a/../b.png"), false);
+  assert.equal(isSafeUploadFilename("..png"), false);
+  assert.equal(isSafeUploadFilename("/etc/passwd"), false);
+  assert.equal(isSafeUploadFilename(""), false);
 });

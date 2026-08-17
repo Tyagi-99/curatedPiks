@@ -14,16 +14,31 @@ function searchLinks(query: string) {
   };
 }
 
+// The seed runs on every deploy (see scripts/build.mjs), so it must never
+// overwrite content an admin has edited in production. Everything below is
+// create-if-missing. Set SEED_OVERWRITE_DEMO=1 locally to refresh demo copy.
+const OVERWRITE_DEMO = process.env.SEED_OVERWRITE_DEMO === "1";
+
 export async function seedDatabase(prisma: PrismaClient) {
   const email = (process.env.ADMIN_EMAIL ?? "admin@curatedpicks.local").toLowerCase();
-  const password = process.env.ADMIN_PASSWORD ?? "ChangeMe123!";
-  const passwordHash = await bcrypt.hash(password, 12);
+  const existingAdmin = await prisma.user.findUnique({ where: { email } });
 
-  await prisma.user.upsert({
-    where: { email },
-    update: { passwordHash, role: "ADMIN" },
-    create: { email, passwordHash, name: "Admin", role: "ADMIN" },
-  });
+  if (!existingAdmin) {
+    // Only ever set a password when creating the account for the first time.
+    const password = process.env.ADMIN_PASSWORD;
+    if (!password) {
+      if (process.env.NODE_ENV === "production" || process.env.VERCEL) {
+        throw new Error(
+          "ADMIN_PASSWORD must be set to create the first admin user in production.",
+        );
+      }
+      console.warn("ADMIN_PASSWORD not set — creating the local dev admin with the default password.");
+    }
+    const passwordHash = await bcrypt.hash(password ?? "ChangeMe123!", 12);
+    await prisma.user.create({
+      data: { email, passwordHash, name: "Admin", role: "ADMIN" },
+    });
+  }
 
   const categories = [
     {
@@ -56,7 +71,7 @@ export async function seedDatabase(prisma: PrismaClient) {
   for (const category of categories) {
     await prisma.category.upsert({
       where: { slug: category.slug },
-      update: { name: category.name, description: category.description },
+      update: OVERWRITE_DEMO ? { name: category.name, description: category.description } : {},
       create: category,
     });
   }
@@ -396,7 +411,7 @@ export async function seedDatabase(prisma: PrismaClient) {
     };
     await prisma.product.upsert({
       where: { slug: product.slug },
-      update: payload,
+      update: OVERWRITE_DEMO ? payload : {},
       create: payload,
     });
   }
@@ -404,15 +419,17 @@ export async function seedDatabase(prisma: PrismaClient) {
   for (const page of LEGAL_PAGES) {
     await prisma.page.upsert({
       where: { slug: page.slug },
-      update: page,
+      update: OVERWRITE_DEMO ? page : {},
       create: page,
     });
   }
 
+  // Hardcoded rather than imported from src/lib/settings, which would pull in a
+  // second PrismaClient. Keep in sync with SITE_NAME there.
   await prisma.setting.upsert({
     where: { key: "siteName" },
     update: {},
-    create: { key: "siteName", value: "CuratedPicks" },
+    create: { key: "siteName", value: "DealDuniya" },
   });
 
   console.log(`Seeded admin ${email} and ${products.length} products`);

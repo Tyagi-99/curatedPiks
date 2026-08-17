@@ -26,7 +26,28 @@ Admin login (change after first login):
 
 Hostinger Business hosts the **domain + email only**. Deploy this app on **Vercel**. Point the Hostinger DNS A/CNAME at Vercel.
 
-For production, switch `DATABASE_URL` to Neon Postgres (same Prisma schema; change `provider = "sqlite"` to `"postgresql"`). Add `AUTH_SECRET` in Vercel env.
+`DATABASE_URL` should be a Neon Postgres URI (the Prisma schema already targets `postgresql`).
+
+Required env vars in production — the build fails fast if any are missing:
+
+| Variable | Why |
+| --- | --- |
+| `DATABASE_URL` | Neon Postgres, `sslmode=require` |
+| `AUTH_SECRET` | Signs session cookies. 32+ random chars (`openssl rand -base64 32`) |
+| `NEXT_PUBLIC_SITE_URL` | Canonical URLs, sitemap, and JSON-LD are built from this |
+| `ADMIN_PASSWORD` | Password for the first admin. Only used when the account does not exist yet |
+
+The seed is **create-if-missing**: it never overwrites products, legal pages,
+settings, or the admin password, because it runs on every deploy. To refresh the
+demo content locally, run `SEED_OVERWRITE_DEMO=1 pnpm db:seed`.
+
+### Known limitation: image uploads
+
+Uploaded images are written to `UPLOAD_DIR` (default `/tmp/curatedpicks-uploads`)
+and served via `/api/uploads/[filename]`. On Vercel that directory is per-instance
+and ephemeral, so uploads do not survive a redeploy or a second instance. Either
+paste hosted image URLs (works today) or move uploads to object storage such as
+Vercel Blob or S3 before relying on the upload button in production.
 
 ## Daily loop
 

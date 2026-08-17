@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { ConfirmSubmitButton } from "@/components/admin/ConfirmSubmitButton";
 import { ImageField } from "@/components/admin/ImageField";
 import { renderMarkdown } from "@/lib/markdown";
 
@@ -181,9 +182,15 @@ export function PostEditor({
         ) : null}
       </div>
       {post?.id && deleteAction ? (
-        <button formAction={deleteAction} name="id" value={post.id} className="text-sm text-danger">
+        <ConfirmSubmitButton
+          formAction={deleteAction}
+          name="id"
+          value={post.id}
+          message={`Delete "${post.title || "this post"}"? This cannot be undone.`}
+          className="text-sm text-danger"
+        >
           Delete post
-        </button>
+        </ConfirmSubmitButton>
       ) : null}
     </form>
   );

@@ -6,9 +6,16 @@ export function CopyButtons({ items }: { items: { label: string; value: string }
   const [copied, setCopied] = useState<string | null>(null);
 
   async function copy(label: string, value: string) {
-    await navigator.clipboard.writeText(value);
-    setCopied(label);
-    setTimeout(() => setCopied(null), 1500);
+    // clipboard.writeText rejects without a secure context or permission; an
+    // unhandled rejection here made the button look like it silently did work.
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(label);
+      setTimeout(() => setCopied(null), 1500);
+    } catch {
+      setCopied(null);
+      window.prompt("Copy this manually:", value);
+    }
   }
 
   return (

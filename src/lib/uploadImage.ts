@@ -26,6 +26,24 @@ export function validateImageFile(file: { type: string; size: number }): string 
   return null;
 }
 
+/**
+ * Where runtime uploads are stored.
+ *
+ * Writing into `public/` does not work: Next only serves the `public/`
+ * directory as it existed at build time, so a file written after `next build`
+ * returns 404. Everything therefore goes to a runtime directory and is served
+ * back through `/api/uploads/[filename]`.
+ *
+ * Set UPLOAD_DIR to a persistent volume for a long-lived host. The default is
+ * per-instance and ephemeral, so a multi-instance or serverless deployment
+ * needs object storage instead (see README).
+ */
+export const UPLOAD_DIR = process.env.UPLOAD_DIR || path.join("/tmp", "curatedpicks-uploads");
+
+export function isSafeUploadFilename(name: string): boolean {
+  return /^[a-z0-9][a-z0-9.-]*$/i.test(name) && !name.includes("..");
+}
+
 export async function saveUploadedImage(file: File): Promise<{ url: string }> {
   const error = validateImageFile(file);
   if (error) throw new Error(error);
@@ -36,15 +54,7 @@ export async function saveUploadedImage(file: File): Promise<{ url: string }> {
   const filename = `${Date.now()}-${sanitizeBaseName(file.name)}.${ext}`;
   const bytes = Buffer.from(await file.arrayBuffer());
 
-  const publicDir = path.join(process.cwd(), "public", "uploads");
-  try {
-    await mkdir(publicDir, { recursive: true });
-    await writeFile(path.join(publicDir, filename), bytes);
-    return { url: `/uploads/${filename}` };
-  } catch {
-    const tmpDir = path.join("/tmp", "curatedpicks-uploads");
-    await mkdir(tmpDir, { recursive: true });
-    await writeFile(path.join(tmpDir, filename), bytes);
-    return { url: `/api/uploads/${filename}` };
-  }
+  await mkdir(UPLOAD_DIR, { recursive: true });
+  await writeFile(path.join(UPLOAD_DIR, filename), bytes);
+  return { url: `/api/uploads/${filename}` };
 }

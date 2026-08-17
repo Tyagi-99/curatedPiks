@@ -1,7 +1,14 @@
+import { redirect } from "next/navigation";
 import { saveRedirect } from "@/app/actions/admin";
+import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export default async function RedirectsPage() {
+  const user = await getSession();
+  if (!user) redirect("/admin/login");
+  if (user.role !== "ADMIN") {
+    return <p>Only an admin can manage redirects.</p>;
+  }
   const redirects = await prisma.redirect.findMany();
   return (
     <div className="max-w-xl">

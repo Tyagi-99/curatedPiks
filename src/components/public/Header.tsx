@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { MobileNav } from "@/components/public/MobileNav";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
@@ -28,8 +29,16 @@ export async function Header() {
               { href: "/contact", label: "Contact" },
             ]}
           />
-          <Link href="/" className="font-display text-2xl tracking-tight">
-            {settings.siteName}
+          <Link href="/" className="inline-flex items-center" aria-label="DealDuniya home">
+            <Image
+              src="/brand/logo.webp"
+              alt="DealDuniya"
+              width={1000}
+              height={347}
+              className="h-9 w-auto md:h-10"
+              priority
+              unoptimized
+            />
           </Link>
         </div>
         <nav className="hidden items-center gap-5 text-sm text-muted md:flex">

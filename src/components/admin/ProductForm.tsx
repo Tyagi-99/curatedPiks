@@ -2,6 +2,7 @@ import { deleteProduct, saveProduct } from "@/app/actions/admin";
 import { parseStringList } from "@/lib/json";
 import { instagramReply, productShareUrl, SOCIAL_SOURCES } from "@/lib/site";
 import { STORES } from "@/lib/stores";
+import { ConfirmSubmitButton } from "./ConfirmSubmitButton";
 import { CopyButtons } from "./CopyButtons";
 import { ImageField } from "./ImageField";
 
@@ -209,9 +210,15 @@ export function ProductForm({
         </div>
       ) : null}
       {product && canEditLinks ? (
-        <button formAction={deleteProduct} name="id" value={product.id} className="text-sm text-danger">
+        <ConfirmSubmitButton
+          formAction={deleteProduct}
+          name="id"
+          value={product.id}
+          message={`Delete "${product.title}"? This also removes its click history and cannot be undone.`}
+          className="text-sm text-danger"
+        >
           Delete product
-        </button>
+        </ConfirmSubmitButton>
       ) : null}
     </form>
   );

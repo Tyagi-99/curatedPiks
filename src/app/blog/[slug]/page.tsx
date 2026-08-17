@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -11,10 +12,15 @@ import { getSettings } from "@/lib/settings";
 
 type Props = { params: Promise<{ slug: string }> };
 
+const getPost = cache((slug: string) => prisma.post.findUnique({ where: { slug } }));
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const post = await prisma.post.findUnique({ where: { slug } });
-  if (!post || post.status !== "PUBLISHED") return { title: "Blog" };
+  const post = await getPost(slug);
+  // Draft previews are reachable with a session, so keep them unindexed.
+  if (!post || post.status !== "PUBLISHED") {
+    return { title: "Blog", robots: { index: false, follow: false } };
+  }
   const title = post.metaTitle || post.title;
   const description = post.metaDescription || post.excerpt;
   const image = post.coverImageUrl || undefined;
@@ -41,7 +47,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function PostPage({ params }: Props) {
   const { slug } = await params;
   const [post, session, settings] = await Promise.all([
-    prisma.post.findUnique({ where: { slug } }),
+    getPost(slug),
     getSession(),
     getSettings(),
   ]);
