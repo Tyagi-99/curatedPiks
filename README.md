@@ -17,10 +17,16 @@ pnpm db:seed
 pnpm dev
 ```
 
-Admin login (change after first login):
+Admin login: set `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `.env` **before** the first
+`pnpm db:seed`. The seed only sets a password when it creates the account, so it
+will never reset one you have already changed.
 
-- Email: `admin@curatedpicks.local`
-- Password: `ChangeMe123!`
+If `ADMIN_PASSWORD` is unset locally, the seed falls back to a well-known
+development password and prints a warning. Never rely on that outside your
+machine — in production the build refuses to run without `ADMIN_PASSWORD` set.
+
+To change the password later, use **Admin → Settings → Change password**, or run
+`pnpm admin:password`.
 
 ## Hosting
 

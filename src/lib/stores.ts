@@ -25,6 +25,11 @@ export type StoreId = (typeof STORES)[number]["id"];
 
 export const STORE_FILTERS = STORES.filter((store) => store.id !== "custom");
 
+/**
+ * Fallback filter list used only if the caller passes no categories.
+ * ShopGrid now receives the real categories from the database, so a category
+ * added in admin shows up as a filter instead of being silently missing.
+ */
 export const CATEGORY_FILTERS = [
   { slug: "home-kitchen", label: "Home Decor" },
   { slug: "fashion-accessories", label: "Fashion" },
@@ -32,6 +37,8 @@ export const CATEGORY_FILTERS = [
   { slug: "beauty", label: "Beauty" },
   { slug: "health-fitness", label: "Fitness" },
 ] as const;
+
+export type CategoryFilter = { slug: string; label: string };
 
 type ProductLike = {
   store?: string | null;

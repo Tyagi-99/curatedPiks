@@ -21,6 +21,11 @@ const getCategory = cache((slug: string) =>
   }),
 );
 
+export async function generateStaticParams() {
+  const categories = await prisma.category.findMany({ select: { slug: true } });
+  return categories.map(({ slug }) => ({ slug }));
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const category = await getCategory(slug);

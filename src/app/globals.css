@@ -121,11 +121,6 @@ h3 {
   letter-spacing: 0.04em;
 }
 
-.tube-bar {
-  background: var(--line);
-  block-size: 1px;
-}
-
 .lift-card {
   transition: transform 220ms ease, box-shadow 220ms ease;
 }
@@ -143,40 +138,7 @@ h3 {
   transform: scale(1.05);
 }
 
-.ticket {
-  position: relative;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  box-shadow: 0 10px 30px rgb(16 19 24 / 0.06);
-}
 
-.ticket::before,
-.ticket::after {
-  content: "";
-  position: absolute;
-  top: -7px;
-  width: 14px;
-  height: 14px;
-  border-radius: 99px;
-  background: var(--bg);
-  border: 1px solid var(--line);
-}
-
-.ticket::before {
-  left: 18px;
-}
-
-.ticket::after {
-  right: 18px;
-}
-
-.perforation {
-  background-image: radial-gradient(circle, var(--bg) 3px, transparent 3.5px);
-  background-size: 14px 10px;
-  background-repeat: repeat-x;
-  background-position: center;
-  height: 10px;
-}
 
 :focus-visible {
   outline: 2px solid var(--tube);

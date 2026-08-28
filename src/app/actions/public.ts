@@ -3,6 +3,8 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { rateLimit } from "@/lib/rateLimit";
+import { clientIp } from "@/lib/requestIp";
 
 export type ContactState = {
   errors?: Partial<Record<"name" | "email" | "subject" | "body" | "form", string>>;
@@ -35,6 +37,20 @@ export async function submitContact(
   _prevState: ContactState,
   formData: FormData,
 ): Promise<ContactState> {
+  // Five messages per 10 minutes per IP. The form previously accepted unlimited
+  // submissions, so it was a free write endpoint for spam.
+  const ip = await clientIp();
+  const limited = rateLimit(`contact:${ip}`, 5, 10 * 60 * 1000);
+  if (!limited.ok) {
+    return {
+      errors: {
+        form: `Too many messages just now. Please try again in about ${Math.ceil(
+          limited.retryAfterSeconds / 60,
+        )} minute(s).`,
+      },
+    };
+  }
+
   const values = {
     name: String(formData.get("name") ?? ""),
     email: String(formData.get("email") ?? ""),
@@ -68,14 +84,41 @@ export async function submitContact(
   redirect("/contact/thanks");
 }
 
-const newsletterSchema = z.string().trim().toLowerCase().max(200).pipe(z.string().email());
+export type NewsletterState = { error?: string; ok?: boolean };
 
-export async function submitNewsletter(formData: FormData) {
+const newsletterSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .min(1, "Enter your email.")
+  .max(200, "That email is too long.")
+  .pipe(z.string().email("Enter a valid email address."));
+
+export async function submitNewsletter(
+  _prev: NewsletterState,
+  formData: FormData,
+): Promise<NewsletterState> {
+  const ip = await clientIp();
+  if (!rateLimit(`newsletter:${ip}`, 5, 10 * 60 * 1000).ok) {
+    return { error: "Too many attempts. Please try again shortly." };
+  }
+
   const parsed = newsletterSchema.safeParse(String(formData.get("email") ?? ""));
-  if (!parsed.success) throw new Error("Enter a valid email");
-  await prisma.subscriber.upsert({
-    where: { email: parsed.data },
-    update: {},
-    create: { email: parsed.data, source: "site" },
-  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Enter a valid email address." };
+  }
+
+  try {
+    // upsert so a repeat signup is a silent success rather than a unique-key error.
+    await prisma.subscriber.upsert({
+      where: { email: parsed.data },
+      update: {},
+      create: { email: parsed.data, source: "site" },
+    });
+  } catch (error) {
+    console.error("Failed to save subscriber", error);
+    return { error: "We could not save that just now. Please try again." };
+  }
+
+  return { ok: true };
 }

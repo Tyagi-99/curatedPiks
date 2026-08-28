@@ -56,10 +56,12 @@ export const getSession = cache(async (): Promise<SessionUser | null> => {
   if (!token) return null;
 
   let id: string;
+  let issuedAt: number | null = null;
   try {
     const { payload } = await jwtVerify(token, secret());
     if (typeof payload.id !== "string") return null;
     id = payload.id;
+    issuedAt = typeof payload.iat === "number" ? payload.iat : null;
   } catch {
     return null;
   }
@@ -70,9 +72,19 @@ export const getSession = cache(async (): Promise<SessionUser | null> => {
   try {
     const user = await prisma.user.findUnique({
       where: { id },
-      select: { id: true, email: true, name: true, role: true },
+      select: { id: true, email: true, name: true, role: true, passwordChangedAt: true },
     });
     if (!user) return null;
+
+    // A password change must sign out cookies issued before it, otherwise a
+    // stolen 14-day token would outlive the rotation meant to revoke it.
+    if (user.passwordChangedAt) {
+      if (issuedAt === null) return null;
+      // iat has one-second resolution, so allow a second of slack to avoid
+      // logging out the session created immediately after the change.
+      if (issuedAt * 1000 < user.passwordChangedAt.getTime() - 1000) return null;
+    }
+
     return {
       id: user.id,
       email: user.email,

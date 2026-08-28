@@ -1,3 +1,4 @@
+import { AdSenseScript } from "./AdSenseScript";
 import { DisableInspect } from "./DisableInspect";
 import { Footer } from "./Footer";
 import { Header } from "./Header";
@@ -18,6 +19,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
         {children}
       </main>
       <Footer />
+      <AdSenseScript />
     </>
   );
 }

@@ -4,7 +4,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { toJsonList } from "@/lib/json";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin, requireUser } from "@/lib/auth";
+import {
+  createSession,
+  hashPassword,
+  requireAdmin,
+  requireUser,
+  verifyPassword,
+} from "@/lib/auth";
 import { setSettings, SITE_NAME } from "@/lib/settings";
 import { urlsForStore } from "@/lib/stores";
 import { isHttpUrl } from "@/lib/urls";
@@ -222,6 +228,52 @@ export async function saveRedirect(formData: FormData) {
     create: { fromPath, toPath },
   });
   redirect("/admin/redirects");
+}
+
+export type PasswordState = { error?: string; ok?: boolean };
+
+const MIN_PASSWORD = 12;
+
+/**
+ * There was previously no way to change an admin password: ADMIN_PASSWORD only
+ * applies when the seed creates the account, so the documented default could
+ * never be rotated from the UI.
+ */
+export async function changePassword(
+  _prev: PasswordState,
+  formData: FormData,
+): Promise<PasswordState> {
+  const user = await requireUser();
+  if (!user) redirect("/admin/login");
+
+  const current = String(formData.get("currentPassword") ?? "");
+  const next = String(formData.get("newPassword") ?? "");
+  const confirm = String(formData.get("confirmPassword") ?? "");
+
+  if (!current || !next) return { error: "Fill in every field." };
+  if (next.length < MIN_PASSWORD) {
+    return { error: `Use at least ${MIN_PASSWORD} characters.` };
+  }
+  if (next.length > 200) return { error: "That password is too long." };
+  if (next !== confirm) return { error: "The new passwords do not match." };
+  if (next === current) return { error: "The new password must be different." };
+
+  const record = await prisma.user.findUnique({ where: { id: user.id } });
+  if (!record) redirect("/admin/login");
+  if (!(await verifyPassword(current, record.passwordHash))) {
+    return { error: "That is not your current password." };
+  }
+
+  const changedAt = new Date();
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { passwordHash: await hashPassword(next), passwordChangedAt: changedAt },
+  });
+
+  // Every existing cookie is now stale, including this browser's, so mint a
+  // fresh one rather than signing the current admin out of their own session.
+  await createSession(user);
+  return { ok: true };
 }
 
 // Message.read was written by nothing, so the dashboard's "Unread mail" count

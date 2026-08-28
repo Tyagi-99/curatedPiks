@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { clientIpFromRequest, rateLimit } from "@/lib/rateLimit";
 import { resolveStore, STORES } from "@/lib/stores";
 import { isHttpUrl } from "@/lib/urls";
 
@@ -41,19 +42,27 @@ export async function GET(
 
   // Record the merchant this product actually resolves to rather than the one
   // in the URL, so the click report cannot be skewed by hand-typed paths.
-  const src = new URL(request.url).searchParams.get("src") ?? "direct";
-  try {
-    await prisma.click.create({
-      data: {
-        productId: product.id,
-        merchant: resolved.id,
-        source: src.slice(0, 32),
-        referrer: request.headers.get("referer")?.slice(0, 500) ?? "",
-      },
-    });
-  } catch (error) {
-    // Analytics must never cost a sale: log and still send the visitor onward.
-    console.error("Failed to record outbound click", error);
+  //
+  // The rate limit caps *recording*, never the redirect: throttling the buy
+  // button would cost real sales, while an unlimited insert let anyone inflate
+  // the click table at will. Over the cap the visitor still reaches the
+  // retailer, we simply stop counting.
+  const ip = clientIpFromRequest(request);
+  if (rateLimit(`click:${ip}`, 60, 60 * 1000).ok) {
+    const src = new URL(request.url).searchParams.get("src") ?? "direct";
+    try {
+      await prisma.click.create({
+        data: {
+          productId: product.id,
+          merchant: resolved.id,
+          source: src.slice(0, 32),
+          referrer: request.headers.get("referer")?.slice(0, 500) ?? "",
+        },
+      });
+    } catch (error) {
+      // Analytics must never cost a sale: log and still send the visitor onward.
+      console.error("Failed to record outbound click", error);
+    }
   }
 
   return NextResponse.redirect(target, 302);

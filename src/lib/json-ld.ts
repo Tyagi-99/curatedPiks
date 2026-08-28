@@ -59,6 +59,12 @@ export function productJsonLd(input: {
       priceCurrency: "INR",
       price: input.priceInr,
       url: `${siteUrl()}${input.path}`,
+      // Google warns on Offer without availability. We do not track retailer
+      // stock, so this states the listing is live, not that stock is verified —
+      // the page itself tells visitors to check the retailer for current price
+      // and availability.
+      availability: "https://schema.org/InStock",
+      itemCondition: "https://schema.org/NewCondition",
     };
   }
   return data;

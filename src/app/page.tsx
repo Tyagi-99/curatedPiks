@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { ProductCard } from "@/components/public/ProductCard";
 import { ShopGrid } from "@/components/public/ShopGrid";
 import { SiteShell } from "@/components/public/SiteShell";
@@ -10,15 +11,22 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
+// The grid ships every product to the client for search/filtering, so the query
+// is capped instead of growing without bound.
+const MAX_PRODUCTS = 120;
+
 export default async function HomePage() {
-  const [settings, products] = await Promise.all([
+  const [settings, products, categories] = await Promise.all([
     getSettings(),
     prisma.product.findMany({
       where: { published: true },
       include: { category: true },
       orderBy: [{ pinnedToBio: "desc" }, { sortOrder: "asc" }, { createdAt: "desc" }],
+      take: MAX_PRODUCTS,
     }),
+    prisma.category.findMany({ select: { slug: true, name: true }, orderBy: { name: "asc" } }),
   ]);
+  const categoryFilters = categories.map((c) => ({ slug: c.slug, label: c.name }));
 
   const featured = products.filter((product) => product.pinnedToBio).slice(0, 3);
   const featuredFallback = featured.length > 0 ? featured : products.slice(0, 3);
@@ -81,7 +89,7 @@ export default async function HomePage() {
         <section id="shop">
           <h2 className="text-4xl">Everything featured</h2>
           <div className="mt-6">
-            <ShopGrid products={products} source="home" />
+            <ShopGrid products={products} source="home" categories={categoryFilters} />
           </div>
         </section>
 
@@ -109,9 +117,9 @@ export default async function HomePage() {
             Picks start from the reels. We only publish a page when the listed specs and trade-offs are clear
             enough to write an honest take. Affiliate terms do not decide the shortlist.
           </p>
-          <a href="/how-we-review" className="mt-4 inline-block text-sm font-medium underline">
+          <Link href="/how-we-review" className="mt-4 inline-block text-sm font-medium underline">
             Read how we review
-          </a>
+          </Link>
         </section>
 
         {instagram || facebook ? (

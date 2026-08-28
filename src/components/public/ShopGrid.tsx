@@ -2,17 +2,24 @@
 
 import { useMemo, useState } from "react";
 import { ProductCard, type ProductCardProduct } from "@/components/public/ProductCard";
-import { CATEGORY_FILTERS, STORE_FILTERS } from "@/lib/stores";
+import { CATEGORY_FILTERS, STORE_FILTERS, type CategoryFilter } from "@/lib/stores";
 
 const PAGE_SIZE = 8;
 
 export function ShopGrid({
   products,
   source = "home",
+  categories,
 }: {
   products: ProductCardProduct[];
   source?: string;
+  categories?: CategoryFilter[];
 }) {
+  // Only offer a category filter that some product on this page actually uses,
+  // so no pill can return an empty grid.
+  const categoryFilters = (categories ?? CATEGORY_FILTERS).filter((item) =>
+    products.some((product) => product.category?.slug === item.slug),
+  );
   const [query, setQuery] = useState("");
   const [store, setStore] = useState("all");
   const [category, setCategory] = useState("all");
@@ -33,7 +40,10 @@ export function ShopGrid({
 
   return (
     <div>
-      <div className="sticky top-[57px] z-30 -mx-4 border-b border-line bg-bg/90 px-4 py-3 backdrop-blur-md sm:mx-0 sm:rounded-3xl sm:border">
+      {/* Header height: py-3 (24px) + logo h-9 (36px) + 1px border = 61px,
+          and 65px from md where the logo is h-10. The old 57px left a gap that
+          page content showed through while scrolling. */}
+      <div className="sticky top-[61px] z-30 -mx-4 border-b border-line bg-bg/90 px-4 py-3 backdrop-blur-md sm:mx-0 sm:rounded-3xl sm:border md:top-[65px]">
         <label className="sr-only" htmlFor="shop-search">
           Search products
         </label>
@@ -70,7 +80,7 @@ export function ShopGrid({
               {item.label}
             </FilterPill>
           ))}
-          {CATEGORY_FILTERS.map((item) => (
+          {categoryFilters.map((item) => (
             <FilterPill
               key={item.slug}
               active={category === item.slug}

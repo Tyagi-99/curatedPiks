@@ -12,7 +12,8 @@ const nav = [
   { href: "/admin/messages", label: "Inbox", adminOnly: true },
   { href: "/admin/subscribers", label: "Newsletter", adminOnly: true },
   { href: "/admin/redirects", label: "Redirects", adminOnly: true },
-  { href: "/admin/settings", label: "Settings", adminOnly: true },
+  // Not admin-only: editors need it to change their own password.
+  { href: "/admin/settings", label: "Settings" },
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {

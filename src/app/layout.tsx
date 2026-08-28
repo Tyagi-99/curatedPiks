@@ -1,11 +1,23 @@
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
 import { Instrument_Serif, Manrope } from "next/font/google";
 import { siteUrl } from "@/lib/env";
 import { getSettings } from "@/lib/settings";
 import "./globals.css";
 
-export const dynamic = "force-dynamic";
+/**
+ * Previously `force-dynamic`, which meant every route in the app was rendered
+ * per request — zero prerendering, a database round trip for every visitor, and
+ * a slow first byte on the product pages that carry the SEO.
+ *
+ * It was needed because this layout read the theme cookie. The pre-paint script
+ * below now resolves the theme before paint, so the cookie read is gone and
+ * pages can be prerendered and revalidated instead.
+ *
+ * Routes that genuinely need per-request data still opt out automatically:
+ * anything calling cookies()/headers() (all of /admin, blog draft previews) or
+ * reading searchParams is dynamic regardless of this setting.
+ */
+export const revalidate = 300;
 
 const manrope = Manrope({
   variable: "--font-body",
@@ -58,20 +70,19 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const theme = (await cookies()).get("theme")?.value;
+export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${manrope.variable} ${instrument.variable} h-full antialiased${theme === "dark" ? " dark" : ""}`}
+      className={`${manrope.variable} ${instrument.variable} h-full antialiased`}
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
       <head>
         {/*
-          Runs before paint. The class is already correct for visitors who have
-          a theme cookie; this covers the first visit, where the stored or OS
-          preference would otherwise be ignored until the second toggle click.
+          Runs before paint, so there is no flash of the wrong theme even though
+          the HTML is now prerendered without knowing the visitor's preference.
+          This is what allows the layout to be static.
         */}
         <script
           dangerouslySetInnerHTML={{

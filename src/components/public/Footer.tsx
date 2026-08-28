@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { DISCLOSURE_COPY } from "@/lib/editorial";
+import { NewsletterForm } from "@/components/public/NewsletterForm";
 import { getSettings } from "@/lib/settings";
 
 export async function Footer() {
@@ -13,6 +14,9 @@ export async function Footer() {
             <Image src="/brand/logo.webp" alt="DealDuniya" width={1000} height={347} className="h-12 w-auto" unoptimized />
           </Link>
           <p className="mt-2 max-w-md text-sm text-muted">{settings.tagline}</p>
+          {/* The Subscriber table and its admin screen existed with no way for
+              a visitor to actually sign up. */}
+          <NewsletterForm />
         </div>
         <div>
           <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] text-faint">Browse</h2>

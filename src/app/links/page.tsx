@@ -9,12 +9,21 @@ export const metadata: Metadata = {
   alternates: { canonical: "/links" },
 };
 
+// Every product is serialised into the client payload for the search/filter UI,
+// so the query is capped rather than unbounded as the catalogue grows.
+const MAX_PRODUCTS = 120;
+
 export default async function LinksPage() {
-  const products = await prisma.product.findMany({
-    where: { published: true },
-    include: { category: true },
-    orderBy: [{ pinnedToBio: "desc" }, { sortOrder: "asc" }, { updatedAt: "desc" }],
-  });
+  const [products, categories] = await Promise.all([
+    prisma.product.findMany({
+      where: { published: true },
+      include: { category: true },
+      orderBy: [{ pinnedToBio: "desc" }, { sortOrder: "asc" }, { updatedAt: "desc" }],
+      take: MAX_PRODUCTS,
+    }),
+    prisma.category.findMany({ select: { slug: true, name: true }, orderBy: { name: "asc" } }),
+  ]);
+  const categoryFilters = categories.map((c) => ({ slug: c.slug, label: c.name }));
 
   return (
     <SiteShell>
@@ -25,7 +34,7 @@ export default async function LinksPage() {
         <section className="mt-8">
           {/* Product cards are h3; this keeps the outline from jumping h1 -> h3. */}
           <h2 className="sr-only">All products</h2>
-          <ShopGrid products={products} source="bio" />
+          <ShopGrid products={products} source="bio" categories={categoryFilters} />
         </section>
       </div>
     </SiteShell>
