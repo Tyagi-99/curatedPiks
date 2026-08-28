@@ -7,6 +7,8 @@
     "build": "node ./scripts/build.mjs",
     "start": "next start --port 3000 --hostname 0.0.0.0",
     "lint": "eslint",
+    "test": "node --test \"src/**/*.test.ts\"",
+    "admin:password": "tsx prisma/set-admin-password.ts",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
     "db:reset": "prisma migrate reset --force"

@@ -1,5 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
 import { DISCLOSURE_COPY } from "@/lib/editorial";
+import { NewsletterForm } from "@/components/public/NewsletterForm";
 import { getSettings } from "@/lib/settings";
 
 export async function Footer() {
@@ -8,11 +10,16 @@ export async function Footer() {
     <footer className="mt-auto border-t border-line bg-surface">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 md:grid-cols-4">
         <div className="md:col-span-2">
-          <div className="font-display text-3xl tracking-tight">{settings.siteName}</div>
+          <Link href="/" className="inline-block" aria-label="DealDuniya home">
+            <Image src="/brand/logo.webp" alt="DealDuniya" width={1000} height={347} className="h-12 w-auto" unoptimized />
+          </Link>
           <p className="mt-2 max-w-md text-sm text-muted">{settings.tagline}</p>
+          {/* The Subscriber table and its admin screen existed with no way for
+              a visitor to actually sign up. */}
+          <NewsletterForm />
         </div>
         <div>
-          <h4 className="font-mono text-[11px] uppercase tracking-[0.16em] text-faint">Browse</h4>
+          <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] text-faint">Browse</h2>
           <ul className="mt-3 space-y-2 text-sm text-muted">
             <li>
               <Link href="/links">All picks</Link>
@@ -32,7 +39,7 @@ export async function Footer() {
           </ul>
         </div>
         <div>
-          <h4 className="font-mono text-[11px] uppercase tracking-[0.16em] text-faint">Legal</h4>
+          <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] text-faint">Legal</h2>
           <ul className="mt-3 space-y-2 text-sm text-muted">
             <li>
               <Link href="/legal/affiliate">Affiliate disclosure</Link>

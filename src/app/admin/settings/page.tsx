@@ -1,4 +1,5 @@
 import { saveSettings } from "@/app/actions/admin";
+import { PasswordForm } from "@/components/admin/PasswordForm";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
 import { getSession } from "@/lib/auth";
@@ -7,15 +8,26 @@ import { redirect } from "next/navigation";
 export default async function SettingsPage() {
   const user = await getSession();
   if (!user) redirect("/admin/login");
+
+  // Anyone signed in can rotate their own password; only admins see the rest.
   if (user.role !== "ADMIN") {
-    return <p>Only an admin can change site settings.</p>;
+    return (
+      <div className="space-y-6">
+        <h1 className="font-serif text-3xl">Settings</h1>
+        <PasswordForm />
+        <p className="text-sm text-muted">Only an admin can change site settings.</p>
+      </div>
+    );
   }
+
   const settings = await getSettings();
   const pages = await prisma.page.findMany();
   const pageMap = Object.fromEntries(pages.map((page) => [page.slug, page]));
 
   return (
-    <form action={saveSettings} className="max-w-2xl space-y-4">
+    <div className="space-y-8">
+      <PasswordForm />
+      <form action={saveSettings} className="max-w-2xl space-y-4">
       <h1 className="font-serif text-3xl">Site settings</h1>
       <label className="block text-sm">
         Site name
@@ -30,8 +42,12 @@ export default async function SettingsPage() {
         <textarea name="disclosure" rows={3} defaultValue={settings.disclosure} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
       </label>
       <label className="block text-sm">
-        AdSense client (ca-pub-…)
+        AdSense client (ca-pub-…) — reference only
         <input name="adsenseClient" defaultValue={settings.adsenseClient} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
+        <span className="mt-1 block text-xs text-muted">
+          The live value comes from NEXT_PUBLIC_ADSENSE_CLIENT, which must be set at
+          build time. Changing it here does not load ads.
+        </span>
       </label>
       <label className="block text-sm">
         Instagram URL
@@ -58,6 +74,7 @@ export default async function SettingsPage() {
         </fieldset>
       ))}
       <button className="rounded-full bg-gray-900 px-5 py-2 text-white">Save settings</button>
-    </form>
+      </form>
+    </div>
   );
 }

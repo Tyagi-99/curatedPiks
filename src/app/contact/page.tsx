@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
+import { ContactForm } from "@/components/public/ContactForm";
 import { SiteShell } from "@/components/public/SiteShell";
-import { submitContact } from "@/app/actions/public";
 import { getSettings } from "@/lib/settings";
 
 export const metadata: Metadata = {
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default async function ContactPage() {
   const settings = await getSettings();
-  const email = settings.contactEmail || "hello@curatedpicks.com";
+  const email = settings.contactEmail || "hello@dealduniya.in";
   const whatsapp = settings.whatsappUrl;
 
   return (
@@ -40,32 +40,7 @@ export default async function ContactPage() {
           ) : null}
         </div>
 
-        <form action={submitContact} className="mt-10 space-y-4">
-          <label className="block text-sm font-medium">
-            Name
-            <input name="name" required className="mt-1 w-full border border-line px-3 py-2" />
-          </label>
-          <label className="block text-sm font-medium">
-            Email
-            <input name="email" type="email" required className="mt-1 w-full border border-line px-3 py-2" />
-          </label>
-          <label className="block text-sm font-medium">
-            Subject
-            <select name="subject" className="mt-1 w-full border border-line px-3 py-2">
-              <option value="general">General</option>
-              <option value="review">Suggest a product</option>
-              <option value="partnership">Partnership</option>
-              <option value="bug">Broken link</option>
-            </select>
-          </label>
-          <label className="block text-sm font-medium">
-            Message
-            <textarea name="body" required minLength={10} rows={5} className="mt-1 w-full border border-line px-3 py-2" />
-          </label>
-          <button type="submit" className="bg-accent px-5 py-2.5 font-medium text-white hover:bg-accent-hover">
-            Send message
-          </button>
-        </form>
+        <ContactForm />
       </div>
     </SiteShell>
   );

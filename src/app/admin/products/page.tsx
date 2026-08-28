@@ -1,8 +1,14 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatInr } from "@/lib/money";
 
 export default async function ProductsAdminPage() {
+  // Middleware only proves the cookie's signature; this confirms the account
+  // still exists before any admin data is read.
+  const user = await getSession();
+  if (!user) redirect("/admin/login");
   const products = await prisma.product.findMany({
     include: { category: true, _count: { select: { clicks: true } } },
     orderBy: { updatedAt: "desc" },

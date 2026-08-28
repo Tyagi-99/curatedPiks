@@ -18,6 +18,16 @@
   --danger-soft: #f8d7d4;
   --star: #d97706;
   --ink: #111111;
+  /* Single buy-button colour, sampled from the logo's gold gradient.
+     Two constraints pin these values down:
+       - dark ink, not white: white on gold is 2.4:1 and fails AA for the
+         14-16px button label. #111 on #a8842b is 5.40:1.
+       - deep enough to separate from the cream page background: a lighter
+         gold (#c9a227) was only 2.24:1 against --bg, under the 3:1 needed
+         for the button to read as a distinct shape. This is 3.24:1. */
+  --cta: #a8842b;
+  --cta-hover: #9e7b26;
+  --cta-ink: #111111;
   color-scheme: light;
 }
 
@@ -37,6 +47,10 @@ html.dark {
   --danger-soft: #3a1816;
   --star: #fbbf24;
   --ink: #f4f4f4;
+  /* Slightly brighter gold so it still reads as a CTA against #0b0b0b. */
+  --cta: #d4af37;
+  --cta-hover: #c9a227;
+  --cta-ink: #111111;
   color-scheme: dark;
 }
 
@@ -55,6 +69,9 @@ html.dark {
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
   --color-star: var(--star);
+  --color-cta: var(--cta);
+  --color-cta-hover: var(--cta-hover);
+  --color-cta-ink: var(--cta-ink);
   --font-sans: var(--font-body);
 }
 
@@ -104,11 +121,6 @@ h3 {
   letter-spacing: 0.04em;
 }
 
-.tube-bar {
-  background: var(--line);
-  block-size: 1px;
-}
-
 .lift-card {
   transition: transform 220ms ease, box-shadow 220ms ease;
 }
@@ -126,40 +138,7 @@ h3 {
   transform: scale(1.05);
 }
 
-.ticket {
-  position: relative;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  box-shadow: 0 10px 30px rgb(16 19 24 / 0.06);
-}
 
-.ticket::before,
-.ticket::after {
-  content: "";
-  position: absolute;
-  top: -7px;
-  width: 14px;
-  height: 14px;
-  border-radius: 99px;
-  background: var(--bg);
-  border: 1px solid var(--line);
-}
-
-.ticket::before {
-  left: 18px;
-}
-
-.ticket::after {
-  right: 18px;
-}
-
-.perforation {
-  background-image: radial-gradient(circle, var(--bg) 3px, transparent 3.5px);
-  background-size: 14px 10px;
-  background-repeat: repeat-x;
-  background-position: center;
-  height: 10px;
-}
 
 :focus-visible {
   outline: 2px solid var(--tube);
@@ -172,5 +151,19 @@ h3 {
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+
+  /* Smooth scrolling is motion too: the anchor links to #shop animated the
+     whole page even when the visitor asked for reduced motion. */
+  html {
+    scroll-behavior: auto;
+  }
+
+  .lift-card:hover {
+    transform: none;
+  }
+
+  .group:hover .img-zoom {
+    transform: none;
   }
 }

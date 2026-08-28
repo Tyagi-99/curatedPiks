@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
   title: "Blog",
-  description: "Guides and longer notes from CuratedPicks — what to check before you buy.",
+  description: "Guides and longer notes from DealDuniya — what to check before you buy.",
   alternates: { canonical: "/blog" },
 };
 
@@ -17,7 +17,7 @@ export default async function BlogPage() {
     orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
   });
   const jsonLd = itemListJsonLd(
-    "CuratedPicks blog",
+    "DealDuniya blog",
     posts.map((post) => ({ name: post.title, path: `/blog/${post.slug}` })),
   );
 
@@ -42,7 +42,13 @@ export default async function BlogPage() {
               >
                 {post.coverImageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={post.coverImageUrl} alt="" className="aspect-[16/9] w-full object-cover" />
+                  <img
+                    src={post.coverImageUrl}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    className="aspect-[16/9] w-full object-cover"
+                  />
                 ) : null}
                 <div className="p-5">
                   {date ? <p className="text-xs text-faint">{date}</p> : null}

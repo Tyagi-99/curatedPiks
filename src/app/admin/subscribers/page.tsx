@@ -1,6 +1,13 @@
+import { redirect } from "next/navigation";
+import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export default async function SubscribersPage() {
+  const user = await getSession();
+  if (!user) redirect("/admin/login");
+  if (user.role !== "ADMIN") {
+    return <p>Only an admin can view the newsletter list.</p>;
+  }
   const subscribers = await prisma.subscriber.findMany({ orderBy: { createdAt: "desc" } });
   const csv = ["email,source,createdAt", ...subscribers.map((s) => `${s.email},${s.source},${s.createdAt.toISOString()}`)].join("\n");
   return (

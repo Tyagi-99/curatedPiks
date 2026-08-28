@@ -5,13 +5,13 @@ import { getSettings } from "@/lib/settings";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "What CuratedPicks is, how products are chosen, and how affiliate links work.",
+  description: "What DealDuniya is, how products are chosen, and how affiliate links work.",
   alternates: { canonical: "/about" },
 };
 
 export default async function AboutPage() {
   const settings = await getSettings();
-  const email = settings.contactEmail || "hello@curatedpicks.com";
+  const email = settings.contactEmail || "hello@dealduniya.in";
 
   return (
     <SiteShell>
@@ -20,9 +20,9 @@ export default async function AboutPage() {
         <h1 className="mt-2 text-5xl leading-[1.05]">About {settings.siteName}</h1>
 
         <section className="mt-8 space-y-4 text-muted">
-          <h2 className="text-3xl text-text">What CuratedPicks is</h2>
+          <h2 className="text-3xl text-text">What DealDuniya is</h2>
           <p>
-            CuratedPicks is a product-discovery site. When someone comments “link” on an Instagram or Facebook
+            DealDuniya is a product-discovery site. When someone comments “link” on an Instagram or Facebook
             post, we send them here — a stable page with photos, a written take, and a button to the retailer.
           </p>
           <p>
@@ -74,7 +74,7 @@ export default async function AboutPage() {
           <h2 className="text-3xl text-text">How information is researched</h2>
           <p>
             Pages are written from retailer listings, published specifications, and publicly available customer
-            feedback. We do not claim that CuratedPicks lab-tests or personally wears every product. If a fact
+            feedback. We do not claim that DealDuniya lab-tests or personally wears every product. If a fact
             is not on the page, treat it as unknown — not as a hidden test result.
           </p>
         </section>

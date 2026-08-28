@@ -15,14 +15,32 @@ export default async function LoginPage({
         </div>
         <h1 className="font-serif text-3xl">Admin</h1>
         <p className="text-sm text-muted">Sign in to publish products and copy Instagram reply links.</p>
-        {error ? <p className="text-sm text-danger">Wrong email or password.</p> : null}
+        {error ? (
+          <p role="alert" className="text-sm text-danger">
+            {error === "throttled"
+              ? "Too many attempts. Wait a few minutes and try again."
+              : "Wrong email or password."}
+          </p>
+        ) : null}
         <label className="block text-sm">
           Email
-          <input name="email" type="email" required className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
+          <input
+            name="email"
+            type="email"
+            required
+            autoComplete="username"
+            className="mt-1 w-full rounded-xl border border-line px-3 py-2"
+          />
         </label>
         <label className="block text-sm">
           Password
-          <input name="password" type="password" required className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
+          <input
+            name="password"
+            type="password"
+            required
+            autoComplete="current-password"
+            className="mt-1 w-full rounded-xl border border-line px-3 py-2"
+          />
         </label>
         <button type="submit" className="w-full rounded-full bg-gray-900 py-2.5 font-medium text-white">
           Sign in

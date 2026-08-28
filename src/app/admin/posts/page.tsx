@@ -1,7 +1,11 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export default async function PostsAdminPage() {
+  const user = await getSession();
+  if (!user) redirect("/admin/login");
   const posts = await prisma.post.findMany({ orderBy: { updatedAt: "desc" } });
   return (
     <div>

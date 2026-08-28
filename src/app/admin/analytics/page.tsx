@@ -1,6 +1,10 @@
+import { redirect } from "next/navigation";
+import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export default async function AnalyticsPage() {
+  const user = await getSession();
+  if (!user) redirect("/admin/login");
   const [byProduct, bySource, byMerchant] = await Promise.all([
     prisma.click.groupBy({
       by: ["productId"],
