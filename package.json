@@ -9,6 +9,9 @@
     "lint": "eslint",
     "test": "node --test \"src/**/*.test.ts\"",
     "admin:password": "tsx prisma/set-admin-password.ts",
+    "demo:status": "tsx prisma/demo-content.ts status",
+    "demo:unpublish": "tsx prisma/demo-content.ts unpublish",
+    "demo:publish": "tsx prisma/demo-content.ts publish",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
     "db:reset": "prisma migrate reset --force"
@@ -18,6 +21,7 @@
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
+    "@vercel/analytics": "2.0.1",
     "bcryptjs": "^3.0.3",
     "jose": "^6.2.8",
     "next": "16.3.1",

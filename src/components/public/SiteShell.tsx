@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import { AdSenseScript } from "./AdSenseScript";
 import { DisableInspect } from "./DisableInspect";
 import { Footer } from "./Footer";
@@ -20,6 +21,13 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
       </main>
       <Footer />
       <AdSenseScript />
+      {/*
+        Traffic measurement. Mounted on the public shell only, so admin activity
+        is not tracked. Vercel Analytics is first-party and cookieless, which
+        keeps the cookie notice accurate — it currently tells visitors this site
+        sets no analytics cookies, and that stays true.
+      */}
+      <Analytics />
     </>
   );
 }

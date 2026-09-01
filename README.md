@@ -61,3 +61,36 @@ Vercel Blob or S3 before relying on the upload button in production.
 2. Publish + pin on `/links`
 3. Copy Instagram reply and paste under the comment `link`
 4. Next day: `/admin/analytics` — which source and retailer got taps
+
+## Scripts
+
+| Command | What it does |
+| --- | --- |
+| `pnpm demo:status` | Shows which seeded demo products are publicly visible |
+| `pnpm demo:unpublish` | Hides all 18 demo products. Reversible. |
+| `pnpm demo:publish` | Puts them back (local development) |
+| `pnpm admin:password` | Rotates a password: `ADMIN_EMAIL=… NEW_PASSWORD='…' pnpm admin:password` |
+| `pnpm test` | Unit tests |
+
+## Before going public
+
+The seed ships 18 example products with invented brand names, arbitrary prices,
+and stock photography. Each is tagged `SAMPLE …` in `editorialNotes`. Publishing
+invented reviews misrepresents the site and will fail Amazon Associates and
+AdSense review, so:
+
+1. `pnpm demo:unpublish`
+2. Add real products through `/admin/products/new`
+3. Put a real affiliate tag on every buy URL — the seeded links are plain search
+   URLs with no `tag=`, so they earn nothing
+4. Rotate the production admin password (`ChangeMe123!` is in this repo's git
+   history and the repo is public)
+5. Set the four required env vars in Vercel and run `prisma migrate deploy`
+6. Verify the domain in Google Search Console and submit `/sitemap.xml`
+
+Traffic is measured with Vercel Analytics, which is first-party and cookieless —
+mounted on the public shell only, so admin activity is not tracked. This is why
+the cookie notice can still say the site sets no analytics cookies.
+
+Image uploads are not durable on Vercel (see *Known limitation* above). Paste
+hosted image URLs until object storage is wired up.
