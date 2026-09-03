@@ -1,18 +1,20 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import { ProductCard } from "@/components/public/ProductCard";
+import { SearchForm } from "@/components/public/SearchForm";
 import { ShopGrid } from "@/components/public/ShopGrid";
 import { SiteShell } from "@/components/public/SiteShell";
-import { organizationJsonLd, websiteJsonLd } from "@/lib/json-ld";
+import { jsonLdScript, organizationJsonLd, websiteJsonLd } from "@/lib/json-ld";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
 
 export const metadata: Metadata = {
+  title: "Find products worth buying",
+  description: "Practical product research, comparisons, and recommendations to help you buy smarter.",
   alternates: { canonical: "/" },
 };
 
-// The grid ships every product to the client for search/filtering, so the query
-// is capped instead of growing without bound.
 const MAX_PRODUCTS = 120;
 
 export default async function HomePage() {
@@ -24,20 +26,21 @@ export default async function HomePage() {
       orderBy: [{ pinnedToBio: "desc" }, { sortOrder: "asc" }, { createdAt: "desc" }],
       take: MAX_PRODUCTS,
     }),
-    prisma.category.findMany({ select: { slug: true, name: true }, orderBy: { name: "asc" } }),
+    prisma.category.findMany({
+      where: { products: { some: { published: true } } },
+      select: { slug: true, name: true, description: true },
+      orderBy: { name: "asc" },
+    }),
   ]);
   const categoryFilters = categories.map((c) => ({ slug: c.slug, label: c.name }));
 
-  const featured = products.filter((product) => product.pinnedToBio).slice(0, 3);
-  const featuredFallback = featured.length > 0 ? featured : products.slice(0, 3);
-  const recent = [...products].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).slice(0, 3);
-  const popular = products.filter((product) => product.popular).slice(0, 3);
-  const popularFallback = popular.length > 0 ? popular : products.slice(0, 3);
-  const instagram = settings.instagramUrl;
-  const facebook = settings.facebookUrl;
+  const featured = products.filter((product) => product.pinnedToBio).slice(0, 4);
+  const featuredIds = new Set(featured.map((product) => product.id));
+  const recent = [...products]
+    .filter((product) => !featuredIds.has(product.id))
+    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+    .slice(0, 4);
 
-  // Organization + WebSite markup was already written and tested in json-ld.ts
-  // but never rendered, so the homepage published no structured data at all.
   const jsonLd = [
     organizationJsonLd({
       siteName: settings.siteName,
@@ -49,106 +52,80 @@ export default async function HomePage() {
 
   return (
     <SiteShell>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }} />
       <section className="border-b border-line">
-        <div className="mx-auto max-w-6xl px-4 py-14 sm:py-20">
-          <p className="text-sm tracking-wide text-muted">Curated from my reels</p>
-          <h1 className="mt-4 max-w-4xl text-5xl leading-[0.95] sm:text-7xl">Products Featured In My Videos</h1>
+        <div className="mx-auto max-w-6xl px-4 py-12 sm:py-16">
+          <h1 className="max-w-3xl text-4xl leading-[1.05] sm:text-6xl">Find products worth buying.</h1>
           <p className="mt-5 max-w-xl text-lg text-muted">
-            Buy all the products you&apos;ve seen in my Instagram videos.
+            Practical product research, comparisons, and recommendations to help you buy smarter.
           </p>
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <a href="#shop" className="rounded-full bg-text px-5 py-3 text-sm font-semibold text-bg">
-              Shop the collection
-            </a>
-            {instagram ? (
-              <a
-                href={instagram}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-line px-5 py-3 text-sm"
-              >
-                Instagram
-              </a>
-            ) : null}
+          <div className="mt-8">
+            <SearchForm id="home-search" size="hero" />
           </div>
         </div>
       </section>
 
       <div className="mx-auto max-w-6xl space-y-16 px-4 py-12">
-        <section>
-          <h2 className="text-4xl">Featured</h2>
-          <p className="mt-2 text-sm text-muted">The pieces people ask about most.</p>
-          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {featuredFallback.map((product) => (
-              <ProductCard key={product.id} product={product} source="home" />
-            ))}
-          </div>
-        </section>
+        {featured.length > 0 ? (
+          <section id="featured">
+            <h2 className="text-4xl">Trending products</h2>
+            <p className="mt-2 text-sm text-muted">Picks people ask about most from the videos.</p>
+            <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {featured.map((product) => (
+                <ProductCard key={product.id} product={product} source="home" />
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {categories.length > 0 ? (
+          <section>
+            <h2 className="text-4xl">Categories</h2>
+            <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {categories.map((category) => (
+                <Link
+                  key={category.slug}
+                  href={`/c/${category.slug}`}
+                  className="rounded-2xl border border-line bg-surface p-5 hover:border-text"
+                >
+                  <h3 className="font-display text-2xl">{category.name}</h3>
+                  {category.description ? <p className="mt-2 text-sm text-muted">{category.description}</p> : null}
+                </Link>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         <section id="shop">
-          <h2 className="text-4xl">Everything featured</h2>
+          <h2 className="text-4xl">All reviews</h2>
           <div className="mt-6">
-            <ShopGrid products={products} source="home" categories={categoryFilters} />
+            <Suspense fallback={<p className="text-sm text-muted">Loading products…</p>}>
+              <ShopGrid products={products} source="home" categories={categoryFilters} />
+            </Suspense>
           </div>
         </section>
 
-        <section>
-          <h2 className="text-4xl">Recently added</h2>
-          <div className="mt-6 grid gap-3">
-            {recent.map((product) => (
-              <ProductCard key={product.id} product={product} source="recent" compact />
-            ))}
-          </div>
-        </section>
+        {recent.length > 0 ? (
+          <section>
+            <h2 className="text-4xl">Latest reviews</h2>
+            <div className="mt-6 grid gap-3">
+              {recent.map((product) => (
+                <ProductCard key={product.id} product={product} source="recent" compact />
+              ))}
+            </div>
+          </section>
+        ) : null}
 
-        <section>
-          <h2 className="text-4xl">Popular right now</h2>
-          <div className="mt-6 grid gap-3">
-            {popularFallback.map((product) => (
-              <ProductCard key={product.id} product={product} source="popular" compact />
-            ))}
-          </div>
-        </section>
-
-        <section className="rounded-3xl border border-line bg-surface p-6 sm:p-8">
+        <section id="guides" className="rounded-2xl border border-line bg-surface p-6 sm:p-8">
           <h2 className="text-3xl">How we choose products</h2>
           <p className="mt-3 max-w-2xl text-muted">
-            Picks start from the reels. We only publish a page when the listed specs and trade-offs are clear
-            enough to write an honest take. Affiliate terms do not decide the shortlist.
+            We only publish a page when the listed specs and trade-offs are clear enough to write an honest take.
+            Affiliate terms do not decide the shortlist.
           </p>
           <Link href="/how-we-review" className="mt-4 inline-block text-sm font-medium underline">
             Read how we review
           </Link>
         </section>
-
-        {instagram || facebook ? (
-          <section>
-            <h2 className="text-3xl">Follow us</h2>
-            <div className="mt-4 flex flex-wrap gap-3">
-              {instagram ? (
-                <a
-                  href={instagram}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="rounded-full border border-line px-5 py-3 text-sm"
-                >
-                  Instagram
-                </a>
-              ) : null}
-              {facebook ? (
-                <a
-                  href={facebook}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="rounded-full border border-line px-5 py-3 text-sm"
-                >
-                  Facebook
-                </a>
-              ) : null}
-            </div>
-          </section>
-        ) : null}
       </div>
     </SiteShell>
   );

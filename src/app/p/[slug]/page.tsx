@@ -5,8 +5,9 @@ import { PreserveClickSource } from "@/components/public/PreserveClickSource";
 import { ProductReview } from "@/components/public/ProductReview";
 import { SiteShell } from "@/components/public/SiteShell";
 import { siteUrl } from "@/lib/env";
-import { breadcrumbJsonLd, productJsonLd } from "@/lib/json-ld";
+import { breadcrumbJsonLd, jsonLdScript, productJsonLd } from "@/lib/json-ld";
 import { prisma } from "@/lib/prisma";
+import { getSettings } from "@/lib/settings";
 import { resolveStore } from "@/lib/stores";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -65,7 +66,7 @@ export default async function ProductPage({ params }: Props) {
   // Reading searchParams here would force this page to render per request.
   // PreserveClickSource overrides this from ?src= in the browser instead.
   const source = "product";
-  const product = await getProduct(slug);
+  const [product, settings] = await Promise.all([getProduct(slug), getSettings()]);
   if (!product || !product.published) notFound();
 
   const related = await prisma.product.findMany({
@@ -97,13 +98,14 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <SiteShell>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }} />
       <PreserveClickSource />
       <ProductReview
         product={product}
         related={related}
         source={source}
         shareUrl={`${siteUrl()}${path}`}
+        disclosure={settings.disclosure}
       />
     </SiteShell>
   );

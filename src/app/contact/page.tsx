@@ -17,11 +17,9 @@ export default async function ContactPage() {
   return (
     <SiteShell>
       <div className="mx-auto max-w-xl px-4 py-12">
-        <p className="text-sm text-tube">We read every message</p>
-        <h1 className="mt-2 text-5xl leading-[1.05]">Contact</h1>
+        <h1 className="text-5xl leading-[1.05]">Contact</h1>
         <p className="mt-3 text-muted">
-          Suggest a product, report a broken link, or talk partnership. Email and WhatsApp will sit here — the form
-          already works.
+          Suggest a product, report a broken link, or ask a question. We read every message.
         </p>
 
         <div className="mt-8 grid gap-3 sm:grid-cols-2">

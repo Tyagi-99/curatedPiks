@@ -1,24 +1,19 @@
 /**
- * Every retailer shares one buy-button treatment. Retailer brand colours
- * (Amazon orange, Nykaa pink, Flipkart blue, …) made the grid look like a
- * collection of other people's logos; the retailer is still named in the
- * button label and the badge, so nothing is lost by dropping the colour.
- *
- * Defined as tokens in globals.css so both themes stay in sync.
+ * Buy buttons stay DealDuniya gold. Platform colour is only used on the
+ * small image badge (see .store-badge-* in globals.css).
  */
 export const STORE_BUTTON_CLASS = "bg-cta text-cta-ink hover:bg-cta-hover";
 
-/** Neutral pill: readable, and it no longer competes with the gold CTA. */
-export const STORE_BADGE_CLASS = "bg-surface/90 text-text border border-line backdrop-blur-sm";
+export const STORE_BADGE_CLASS = "store-badge";
 
 export const STORES = [
-  { id: "amazon", label: "Amazon", badgeClass: STORE_BADGE_CLASS, buttonClass: STORE_BUTTON_CLASS },
-  { id: "flipkart", label: "Flipkart", badgeClass: STORE_BADGE_CLASS, buttonClass: STORE_BUTTON_CLASS },
-  { id: "myntra", label: "Myntra", badgeClass: STORE_BADGE_CLASS, buttonClass: STORE_BUTTON_CLASS },
-  { id: "ajio", label: "Ajio", badgeClass: STORE_BADGE_CLASS, buttonClass: STORE_BUTTON_CLASS },
-  { id: "nykaa", label: "Nykaa", badgeClass: STORE_BADGE_CLASS, buttonClass: STORE_BUTTON_CLASS },
-  { id: "meesho", label: "Meesho", badgeClass: STORE_BADGE_CLASS, buttonClass: STORE_BUTTON_CLASS },
-  { id: "custom", label: "Store", badgeClass: STORE_BADGE_CLASS, buttonClass: STORE_BUTTON_CLASS },
+  { id: "amazon", label: "Amazon", badgeClass: "store-badge store-badge-amazon", buttonClass: STORE_BUTTON_CLASS },
+  { id: "flipkart", label: "Flipkart", badgeClass: "store-badge store-badge-flipkart", buttonClass: STORE_BUTTON_CLASS },
+  { id: "myntra", label: "Myntra", badgeClass: "store-badge store-badge-myntra", buttonClass: STORE_BUTTON_CLASS },
+  { id: "ajio", label: "Ajio", badgeClass: "store-badge store-badge-ajio", buttonClass: STORE_BUTTON_CLASS },
+  { id: "nykaa", label: "Nykaa", badgeClass: "store-badge store-badge-nykaa", buttonClass: STORE_BUTTON_CLASS },
+  { id: "meesho", label: "Meesho", badgeClass: "store-badge store-badge-meesho", buttonClass: STORE_BUTTON_CLASS },
+  { id: "custom", label: "Store", badgeClass: "store-badge store-badge-custom", buttonClass: STORE_BUTTON_CLASS },
 ] as const;
 
 export type StoreId = (typeof STORES)[number]["id"];

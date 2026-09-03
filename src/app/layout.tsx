@@ -39,6 +39,8 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description: settings.tagline,
     metadataBase: new URL(siteUrl()),
+    manifest: "/manifest.webmanifest",
+    themeColor: "#a8842b",
     // Bump ?v= whenever the icon files are regenerated; browsers and social
     // scrapers cache favicons aggressively.
     icons: {

@@ -182,18 +182,24 @@ export function ProductForm({
         Display order
         <input name="sortOrder" type="number" defaultValue={product?.sortOrder ?? 0} className="mt-1 w-full rounded-xl border border-line px-3 py-2" />
       </label>
-      <label className="flex items-center gap-2 text-sm">
-        <input type="checkbox" name="published" defaultChecked={product?.published} />
-        Publish (live on the site)
-      </label>
-      <label className="flex items-center gap-2 text-sm">
-        <input type="checkbox" name="pinnedToBio" defaultChecked={product?.pinnedToBio} />
-        Featured product
-      </label>
-      <label className="flex items-center gap-2 text-sm">
-        <input type="checkbox" name="popular" defaultChecked={product?.popular} />
-        Popular
-      </label>
+      {canEditLinks ? (
+        <>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" name="published" defaultChecked={product?.published} />
+            Publish (live on the site)
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" name="pinnedToBio" defaultChecked={product?.pinnedToBio} />
+            Featured product
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" name="popular" defaultChecked={product?.popular} />
+            Popular
+          </label>
+        </>
+      ) : (
+        <p className="text-sm text-muted">Only an admin can publish, feature, or mark a product popular.</p>
+      )}
       <button type="submit" className="rounded-full bg-gray-900 px-5 py-2 text-white">
         Save
       </button>

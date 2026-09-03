@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { ShopGrid } from "@/components/public/ShopGrid";
 import { SiteShell } from "@/components/public/SiteShell";
 import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
-  title: "Shop the reels",
-  description: "Every product featured in the videos, with a direct buy button.",
+  title: "Product reviews",
+  description: "Every DealDuniya product review, with photos, trade-offs, and a link to check the current price.",
   alternates: { canonical: "/links" },
 };
 
@@ -28,13 +29,15 @@ export default async function LinksPage() {
   return (
     <SiteShell>
       <div className="mx-auto max-w-6xl px-4 py-10">
-        <p className="text-sm text-muted">Instagram bio</p>
-        <h1 className="mt-2 text-5xl leading-[1.05]">Shop the reels</h1>
-        <p className="mt-4 max-w-xl text-muted">Buy the products you saw in the videos.</p>
+        <h1 className="text-5xl leading-[1.05]">Product reviews</h1>
+        <p className="mt-4 max-w-xl text-muted">
+          Read the verdict, then check the current price on the retailer if it still fits.
+        </p>
         <section className="mt-8">
-          {/* Product cards are h3; this keeps the outline from jumping h1 -> h3. */}
           <h2 className="sr-only">All products</h2>
-          <ShopGrid products={products} source="bio" categories={categoryFilters} />
+          <Suspense fallback={<p className="text-sm text-muted">Loading products…</p>}>
+            <ShopGrid products={products} source="bio" categories={categoryFilters} />
+          </Suspense>
         </section>
       </div>
     </SiteShell>

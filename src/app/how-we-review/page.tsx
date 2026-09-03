@@ -51,8 +51,7 @@ export default function HowWeReviewPage() {
   return (
     <SiteShell>
       <article className="mx-auto max-w-2xl px-4 py-12">
-        <p className="text-sm text-tube">Methodology</p>
-        <h1 className="mt-2 text-5xl leading-[1.05]">How DealDuniya reviews and curates products</h1>
+        <h1 className="text-5xl leading-[1.05]">How DealDuniya reviews and curates products</h1>
         <p className="mt-4 text-muted">
           Affiliate programmes do not decide the shortlist. A retailer paying a commission is not a reason to
           feature a product — or to hide a limitation.

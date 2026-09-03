@@ -1,5 +1,12 @@
 import { siteUrl } from "@/lib/env";
 import { realSocialUrl } from "@/lib/urls";
+import { absoluteAssetUrl as withOrigin, jsonLdScript, websiteSearchAction } from "./jsonLdFormat";
+
+export { jsonLdScript };
+
+export function absoluteAssetUrl(value: string): string {
+  return withOrigin(value, siteUrl());
+}
 
 export function organizationJsonLd(settings: { siteName: string; instagramUrl?: string; facebookUrl?: string }) {
   const sameAs = [realSocialUrl(settings.instagramUrl), realSocialUrl(settings.facebookUrl)].filter(
@@ -21,6 +28,7 @@ export function websiteJsonLd(settings: { siteName: string; tagline: string }) {
     name: settings.siteName,
     url: siteUrl(),
     description: settings.tagline,
+    potentialAction: websiteSearchAction(siteUrl()),
   };
 }
 
@@ -51,7 +59,7 @@ export function productJsonLd(input: {
     name: input.name,
     description: input.description,
   };
-  if (input.images.length) data.image = input.images;
+  if (input.images.length) data.image = input.images.map((image) => absoluteAssetUrl(image));
   if (input.brand) data.brand = { "@type": "Brand", name: input.brand };
   if (input.priceInr > 0) {
     data.offers = {
@@ -88,7 +96,7 @@ export function articleJsonLd(input: {
     author: { "@type": "Organization", name: input.publisherName },
     publisher: { "@type": "Organization", name: input.publisherName, url: siteUrl() },
   };
-  if (input.image) data.image = input.image.startsWith("http") ? input.image : `${siteUrl()}${input.image}`;
+  if (input.image) data.image = absoluteAssetUrl(input.image);
   if (input.datePublished) data.datePublished = input.datePublished.toISOString();
   if (input.dateModified) data.dateModified = input.dateModified.toISOString();
   return data;

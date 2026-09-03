@@ -16,8 +16,7 @@ export default async function AboutPage() {
   return (
     <SiteShell>
       <article className="mx-auto max-w-2xl px-4 py-12">
-        <p className="text-sm text-tube">Who we are</p>
-        <h1 className="mt-2 text-5xl leading-[1.05]">About {settings.siteName}</h1>
+        <h1 className="text-5xl leading-[1.05]">About {settings.siteName}</h1>
 
         <section className="mt-8 space-y-4 text-muted">
           <h2 className="text-3xl text-text">What DealDuniya is</h2>

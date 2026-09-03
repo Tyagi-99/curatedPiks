@@ -9,9 +9,11 @@ export const SITE_NAME = "DealDuniya";
 // should all resolve to the current brand name.
 const LEGACY_SITE_NAMES = new Set(["CuratedPicks", "Dealduniya", "dealduniya", "MyRealBrand"]);
 
+const LEGACY_TAGLINES = new Set(["Buy all the products you've seen in my Instagram videos."]);
+
 const DEFAULTS: Record<string, string> = {
   siteName: SITE_NAME,
-  tagline: "Buy all the products you've seen in my Instagram videos.",
+  tagline: "Practical product research, comparisons, and recommendations to help you buy smarter.",
   disclosure: DISCLOSURE_COPY,
   adsenseClient: "",
   instagramUrl: "",
@@ -28,6 +30,7 @@ export const getSettings = cache(async () => {
     const map = { ...DEFAULTS };
     for (const row of rows) map[row.key] = row.value;
     if (!map.siteName || LEGACY_SITE_NAMES.has(map.siteName)) map.siteName = SITE_NAME;
+    if (!map.tagline || LEGACY_TAGLINES.has(map.tagline)) map.tagline = DEFAULTS.tagline;
     map.instagramUrl = realSocialUrl(map.instagramUrl) ?? "";
     map.facebookUrl = realSocialUrl(map.facebookUrl) ?? "";
     return map;

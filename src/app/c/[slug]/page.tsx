@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProductCard } from "@/components/public/ProductCard";
 import { SiteShell } from "@/components/public/SiteShell";
-import { itemListJsonLd } from "@/lib/json-ld";
+import { itemListJsonLd, jsonLdScript } from "@/lib/json-ld";
 import { prisma } from "@/lib/prisma";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -49,10 +49,9 @@ export default async function CategoryPage({ params }: Props) {
 
   return (
     <SiteShell>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }} />
       <div className="mx-auto max-w-6xl px-4 py-12">
-        <p className="text-sm text-tube">Category</p>
-        <h1 className="mt-2 text-5xl leading-[0.92]">{category.name}</h1>
+        <h1 className="text-5xl leading-[0.92]">{category.name}</h1>
         <p className="mt-3 max-w-2xl text-muted">{category.description}</p>
         <h2 className="sr-only">Products in {category.name}</h2>
         <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">

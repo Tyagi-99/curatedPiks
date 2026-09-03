@@ -35,8 +35,7 @@ export default async function LegalPage({ params }: Props) {
   return (
     <SiteShell>
       <article className="mx-auto max-w-2xl px-4 py-12">
-        <p className="text-sm text-tube">Legal</p>
-        <h1 className="mt-2 text-4xl leading-[1.05]">{page.title}</h1>
+        <h1 className="text-4xl leading-[1.05]">{page.title}</h1>
         {/* Driven by the row's own timestamp; this used to be a hardcoded date
             that would silently go stale after any edit. */}
         <p className="mt-2 text-sm text-faint">

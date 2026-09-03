@@ -92,12 +92,14 @@ Questions about these terms: hello@dealduniya.in.`,
 No. You can read our picks and use the buy buttons without accepting extra cookies from us. This page exists so you know what, if anything, is stored in your browser.
 
 ## What this site does today
-Browsing product pages does not require a cookie from DealDuniya. The contact form sends us a message; it does not sign you into an account.
+DealDuniya stores a single preference cookie named "theme" so light or dark mode can persist between visits. It is not used for advertising. The contact form sends us a message; it does not sign you into an account.
 
 If you tap a buy button, you leave our site. Amazon, Flipkart, or another store may then set their own cookies so they can run their shop and, where relevant, recognise that you arrived from a recommendation site. That is their technology. You manage it in that store’s cookie settings, not here.
 
+Admin pages use a separate signed-in session cookie. That cookie is only set after you log in to the dashboard.
+
 ## What we do not do today
-We do not currently run Google AdSense or other advertising networks on these pages. We do not drop marketing pixels for visitors. If that changes, we will update this notice before those tools go live.
+We do not currently run Google AdSense or other advertising networks on these pages. We do not drop marketing pixels for visitors. If that changes, we will update this notice before those tools go live. Vercel Analytics, when enabled, is first-party and cookieless.
 
 ## How to control cookies
 You can block or delete cookies in your browser settings (Chrome, Safari, Firefox, Brave, and others each have a privacy or site-data screen). Blocking all cookies on Amazon or Flipkart may stop you from checking out there.

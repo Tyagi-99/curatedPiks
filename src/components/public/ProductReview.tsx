@@ -5,7 +5,7 @@ import { ProductCard, type ProductCardProduct } from "@/components/public/Produc
 import { ShareActions } from "@/components/public/ShareActions";
 import { DISCLOSURE_COPY, formatUpdated, parseSpecs } from "@/lib/editorial";
 import { parseStringList } from "@/lib/json";
-import { discountPercent, formatInr } from "@/lib/money";
+import { formatInr, showCompareAt } from "@/lib/money";
 import { resolveStore } from "@/lib/stores";
 
 export type ReviewProduct = ProductCardProduct & {
@@ -39,14 +39,16 @@ export function ProductReview({
   related,
   source,
   shareUrl,
+  disclosure,
 }: {
   product: ReviewProduct;
   related: ProductCardProduct[];
   source: string;
   shareUrl: string;
+  disclosure?: string;
 }) {
   const store = resolveStore(product);
-  const off = discountPercent(product.priceInr, product.compareAtInr);
+  const compare = showCompareAt(product.priceInr, product.compareAtInr);
   const images = [product.imageUrl, product.ogImageUrl].filter(
     (value, index, all) => value && all.indexOf(value) === index,
   );
@@ -78,13 +80,15 @@ export function ProductReview({
         </ol>
       </nav>
 
-      <div className="mt-4 overflow-hidden rounded-3xl border border-line bg-surface">
+      <div className="mt-4 overflow-hidden rounded-2xl border border-line bg-surface">
         {images[0] ? (
           // This is the LCP element on a product page.
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={images[0]}
             alt={product.title}
+            width={1200}
+            height={960}
             fetchPriority="high"
             decoding="async"
             className="aspect-[4/5] w-full object-cover sm:aspect-[5/4]"
@@ -111,9 +115,6 @@ export function ProductReview({
 
       <div className="mt-5 flex flex-wrap gap-2">
         <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${store.badgeClass}`}>{store.label}</span>
-        {off ? (
-          <span className="rounded-full bg-black px-2.5 py-1 text-[11px] font-semibold text-white">{off}% off</span>
-        ) : null}
         <span className="rounded-full border border-line px-2.5 py-1 text-[11px]">{product.category.name}</span>
       </div>
 
@@ -122,7 +123,7 @@ export function ProductReview({
       {product.shortDescription ? <p className="mt-3 text-muted">{product.shortDescription}</p> : null}
 
       {product.quickVerdict ? (
-        <Section title="Quick verdict">
+        <Section title="Our verdict">
           <p className="leading-relaxed text-muted">{product.quickVerdict}</p>
         </Section>
       ) : null}
@@ -130,8 +131,10 @@ export function ProductReview({
       <section className="mt-10">
         <h2 className="text-3xl">Price and availability</h2>
         <div className="mt-3 flex flex-wrap items-baseline gap-2">
-          <span className="text-2xl font-semibold">{formatInr(product.priceInr)}</span>
-          {product.compareAtInr ? <span className="text-muted line-through">{formatInr(product.compareAtInr)}</span> : null}
+          <span className="text-2xl font-semibold tabular-nums">{formatInr(product.priceInr)}</span>
+          {compare && product.compareAtInr ? (
+            <span className="text-muted line-through tabular-nums">{formatInr(product.compareAtInr)}</span>
+          ) : null}
         </div>
         <p className="mt-3 text-sm text-muted">
           Prices and availability can change. Check the retailer for the latest price.
@@ -198,7 +201,7 @@ export function ProductReview({
       ) : null}
 
       {bestFor.length > 0 ? (
-        <Section title="Who should consider it">
+        <Section title="Best for">
           <ul className="list-disc space-y-1 pl-5 text-muted">
             {bestFor.map((item) => (
               <li key={item}>{item}</li>
@@ -208,7 +211,7 @@ export function ProductReview({
       ) : null}
 
       {notFor.length > 0 ? (
-        <Section title="Who should skip it">
+        <Section title="Not ideal for">
           <ul className="list-disc space-y-1 pl-5 text-muted">
             {notFor.map((item) => (
               <li key={item}>{item}</li>
@@ -230,8 +233,15 @@ export function ProductReview({
         </Section>
       ) : null}
 
+      <Section title="How this page was researched">
+        <p className="leading-relaxed text-muted">
+          This is a researched recommendation, not a lab test. Specs, trade-offs, and the price shown come from
+          retailer listings and public information. Check the store for current price and stock before you buy.
+        </p>
+      </Section>
+
       {related.length > 0 ? (
-        <Section title="You might also like">
+        <Section title="Alternatives">
           <div className="grid gap-6 sm:grid-cols-2">
             {related.map((item) => (
               <ProductCard key={item.id} product={item} source={source} />
@@ -246,7 +256,7 @@ export function ProductReview({
         </Section>
       ) : null}
 
-      <p className="mt-10 text-sm leading-relaxed text-faint">{DISCLOSURE_COPY}</p>
+      <p className="mt-10 text-sm leading-relaxed text-faint">{disclosure || DISCLOSURE_COPY}</p>
     </article>
   );
 }

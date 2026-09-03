@@ -13,6 +13,7 @@ import {
 } from "@/lib/auth";
 import { setSettings, SITE_NAME } from "@/lib/settings";
 import { urlsForStore } from "@/lib/stores";
+import { postStatusForSave, publishedForSave } from "@/lib/publishState";
 import { isHttpUrl } from "@/lib/urls";
 
 function slugify(value: string) {
@@ -92,7 +93,7 @@ export async function saveProduct(formData: FormData) {
     consJson: toJsonList(String(formData.get("cons") ?? "")),
     featuresJson: JSON.stringify(specs),
     categoryId,
-    published: user.role === "ADMIN" ? formData.get("published") === "on" : false,
+    published: publishedForSave(user.role, formData.get("published") === "on", existing?.published),
     pinnedToBio: user.role === "ADMIN" ? formData.get("pinnedToBio") === "on" : (existing?.pinnedToBio ?? false),
     popular: user.role === "ADMIN" ? formData.get("popular") === "on" : (existing?.popular ?? false),
     sortOrder: Number(formData.get("sortOrder") || existing?.sortOrder || 0),
@@ -145,9 +146,9 @@ export async function savePost(formData: FormData) {
   if (slugOwner && slugOwner.id !== id) {
     throw new Error(`The URL "${slug}" is already used by another post. Choose a different slug.`);
   }
-  const publish = user.role === "ADMIN" && formData.get("published") === "on";
-  const status = publish ? "PUBLISHED" : "DRAFT";
-  const publishedAt = publish ? (existing?.publishedAt ?? new Date()) : (existing?.publishedAt ?? null);
+  const status = postStatusForSave(user.role, formData.get("published") === "on", existing?.status);
+  const publishedAt =
+    status === "PUBLISHED" ? (existing?.publishedAt ?? new Date()) : (existing?.publishedAt ?? null);
   const data = {
     title,
     slug,
@@ -208,6 +209,12 @@ export async function saveSettings(formData: FormData) {
     }
   }
   revalidatePath("/");
+  revalidatePath("/about");
+  revalidatePath("/contact");
+  revalidatePath("/legal/affiliate");
+  revalidatePath("/legal/privacy");
+  revalidatePath("/legal/terms");
+  revalidatePath("/legal/cookies");
   redirect("/admin/settings");
 }
 

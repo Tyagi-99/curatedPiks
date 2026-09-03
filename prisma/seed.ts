@@ -424,6 +424,12 @@ export async function seedDatabase(prisma: PrismaClient) {
     });
   }
 
+  const cookies = await prisma.page.findUnique({ where: { slug: "cookies" } });
+  if (cookies?.body.includes("Browsing product pages does not require a cookie")) {
+    const next = LEGAL_PAGES.find((page) => page.slug === "cookies");
+    if (next) await prisma.page.update({ where: { slug: "cookies" }, data: next });
+  }
+
   // Hardcoded rather than imported from src/lib/settings, which would pull in a
   // second PrismaClient. Keep in sync with SITE_NAME there.
   await prisma.setting.upsert({

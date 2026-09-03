@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteShell } from "@/components/public/SiteShell";
 import { formatUpdated } from "@/lib/editorial";
-import { itemListJsonLd } from "@/lib/json-ld";
+import { itemListJsonLd, jsonLdScript } from "@/lib/json-ld";
 import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
@@ -23,7 +23,7 @@ export default async function BlogPage() {
 
   return (
     <SiteShell>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }} />
       <div className="mx-auto max-w-3xl px-4 py-12">
         <p className="text-sm text-muted">Guides</p>
         <h1 className="mt-2 text-5xl leading-[1.05]">Blog</h1>

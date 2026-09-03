@@ -12,8 +12,8 @@ export default function NotFound() {
           <Link href="/" className="rounded-full bg-text px-5 py-3 text-sm font-semibold text-bg">
             Home
           </Link>
-          <Link href="/#shop" className="rounded-full border border-line px-5 py-3 text-sm">
-            Shop the collection
+          <Link href="/links" className="rounded-full border border-line px-5 py-3 text-sm">
+            Browse reviews
           </Link>
         </div>
       </div>

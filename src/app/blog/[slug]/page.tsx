@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { SiteShell } from "@/components/public/SiteShell";
 import { getSession } from "@/lib/auth";
 import { formatUpdated } from "@/lib/editorial";
-import { articleJsonLd, breadcrumbJsonLd } from "@/lib/json-ld";
+import { articleJsonLd, breadcrumbJsonLd, jsonLdScript } from "@/lib/json-ld";
 import { renderMarkdown } from "@/lib/markdown";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
@@ -76,7 +76,7 @@ export default async function PostPage({ params }: Props) {
 
   return (
     <SiteShell>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }} />
       <article className="mx-auto max-w-2xl px-4 py-12">
         <p className="text-sm text-muted">
           <Link href="/blog" className="hover:text-text">

@@ -18,39 +18,57 @@
   --danger-soft: #f8d7d4;
   --star: #d97706;
   --ink: #111111;
-  /* Single buy-button colour, sampled from the logo's gold gradient.
-     Two constraints pin these values down:
-       - dark ink, not white: white on gold is 2.4:1 and fails AA for the
-         14-16px button label. #111 on #a8842b is 5.40:1.
-       - deep enough to separate from the cream page background: a lighter
-         gold (#c9a227) was only 2.24:1 against --bg, under the 3:1 needed
-         for the button to read as a distinct shape. This is 3.24:1. */
+  --warning: #9a6700;
   --cta: #a8842b;
   --cta-hover: #9e7b26;
   --cta-ink: #111111;
+  --background: var(--bg);
+  --foreground: var(--text);
+  --surface-elevated: #ffffff;
+  --surface-muted: #efece6;
+  --border: var(--line);
+  --border-subtle: #efece6;
+  --text-primary: var(--text);
+  --text-secondary: var(--muted);
+  --text-muted: var(--faint);
+  --brand: var(--cta);
+  --brand-hover: var(--cta-hover);
+  --focus: #435ee5;
   color-scheme: light;
 }
 
 html.dark {
-  --bg: #0b0b0b;
-  --surface: #141414;
-  --text: #f4f4f4;
-  --muted: #a3a3a3;
-  --faint: #737373;
-  --line: #2a2a2a;
-  --accent: #f4f4f4;
+  --bg: #0f0e0c;
+  --surface: #1a1916;
+  --text: #f4f1ea;
+  --muted: #b7b1a6;
+  --faint: #8a847a;
+  --line: #2e2c27;
+  --accent: #f4f1ea;
   --accent-hover: #ffffff;
-  --tube: #a3a3a3;
+  --tube: #b7b1a6;
   --success: #4ade80;
   --success-soft: #143024;
   --danger: #f97066;
   --danger-soft: #3a1816;
-  --star: #fbbf24;
-  --ink: #f4f4f4;
-  /* Slightly brighter gold so it still reads as a CTA against #0b0b0b. */
+  --star: #e4b84a;
+  --ink: #f4f1ea;
+  --warning: #e4b84a;
   --cta: #d4af37;
   --cta-hover: #c9a227;
   --cta-ink: #111111;
+  --background: var(--bg);
+  --foreground: var(--text);
+  --surface-elevated: #221f1b;
+  --surface-muted: #161512;
+  --border: var(--line);
+  --border-subtle: #3a372f;
+  --text-primary: var(--text);
+  --text-secondary: var(--muted);
+  --text-muted: var(--faint);
+  --brand: var(--cta);
+  --brand-hover: var(--cta-hover);
+  --focus: #8ea2ff;
   color-scheme: dark;
 }
 
@@ -69,10 +87,23 @@ html.dark {
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
   --color-star: var(--star);
+  --color-warning: var(--warning);
   --color-cta: var(--cta);
   --color-cta-hover: var(--cta-hover);
   --color-cta-ink: var(--cta-ink);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-focus: var(--focus);
   --font-sans: var(--font-body);
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1rem;
 }
 
 html {
@@ -85,14 +116,17 @@ body {
   font-family: var(--font-body), system-ui, sans-serif;
 }
 
-body::before {
-  content: "";
-  pointer-events: none;
-  position: fixed;
-  inset: 0;
-  z-index: 80;
-  opacity: 0.035;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+button,
+a,
+[role="button"] {
+  touch-action: manipulation;
+}
+
+#shop,
+#featured,
+#main,
+#guides {
+  scroll-margin-top: 5.5rem;
 }
 
 input,
@@ -104,11 +138,26 @@ select {
 
 h1,
 h2,
-h3 {
+h3,
+h4 {
   font-family: var(--font-display), "Times New Roman", serif;
   letter-spacing: -0.02em;
   font-weight: 400;
   text-wrap: balance;
+}
+
+h1 {
+  line-height: 1.05;
+}
+
+h2,
+h3,
+h4 {
+  text-wrap: pretty;
+}
+
+p {
+  text-wrap: pretty;
 }
 
 .font-display {
@@ -138,11 +187,134 @@ h3 {
   transform: scale(1.05);
 }
 
+.product-card {
+  transition: transform 220ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 220ms ease;
+}
+
+.product-card-image {
+  transition: transform 320ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.product-card-cta {
+  transition: background-color 180ms ease, transform 160ms ease-out;
+}
+
+.product-card-cta:active {
+  transform: scale(0.97);
+}
+
+.product-card-review {
+  color: var(--text);
+  text-underline-offset: 4px;
+}
+
+.product-card-review:hover {
+  text-decoration: underline;
+}
+
+.editorial-badge {
+  border-radius: 9999px;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  color: var(--text);
+  border: 1px solid var(--line);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .product-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgb(17 17 17 / 0.1);
+  }
+
+  html.dark .product-card:hover {
+    box-shadow: 0 12px 28px rgb(0 0 0 / 0.45);
+  }
+
+  .product-card:hover .product-card-image {
+    transform: scale(1.03);
+  }
+
+  .product-card:hover .product-card-cta {
+    background: var(--cta-hover);
+  }
+}
+
+.store-badge {
+  border-radius: 9999px;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.store-badge-amazon {
+  background: #fff4e5;
+  color: #8a4b00;
+}
+.store-badge-flipkart {
+  background: #e8f1ff;
+  color: #1647a0;
+}
+.store-badge-myntra {
+  background: #ffe8ef;
+  color: #b01040;
+}
+.store-badge-ajio {
+  background: #f4ede4;
+  color: #5c3a1e;
+}
+.store-badge-nykaa {
+  background: #ffe6f0;
+  color: #b01050;
+}
+.store-badge-meesho {
+  background: #f6e8f4;
+  color: #7a1868;
+}
+.store-badge-custom {
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  color: var(--text);
+  border: 1px solid var(--line);
+}
+
+html.dark .store-badge-amazon {
+  background: #2c2114;
+  color: #f0b35a;
+}
+html.dark .store-badge-flipkart {
+  background: #152238;
+  color: #8bb4f0;
+}
+html.dark .store-badge-myntra {
+  background: #2a1520;
+  color: #f59ab3;
+}
+html.dark .store-badge-ajio {
+  background: #2a2218;
+  color: #e0c3a0;
+}
+html.dark .store-badge-nykaa {
+  background: #2a1520;
+  color: #f48aaa;
+}
+html.dark .store-badge-meesho {
+  background: #261526;
+  color: #e09ad4;
+}
+
 
 
 :focus-visible {
-  outline: 2px solid var(--tube);
+  outline: 2px solid var(--focus);
   outline-offset: 3px;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--brand) 35%, transparent);
+  color: var(--text);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -164,6 +336,12 @@ h3 {
   }
 
   .group:hover .img-zoom {
+    transform: none;
+  }
+
+  .product-card:hover,
+  .product-card:hover .product-card-image,
+  .product-card-cta:active {
     transform: none;
   }
 }
