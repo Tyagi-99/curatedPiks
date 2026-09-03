@@ -15,6 +15,7 @@ import { setSettings, SITE_NAME } from "@/lib/settings";
 import { urlsForStore } from "@/lib/stores";
 import { postStatusForSave, publishedForSave } from "@/lib/publishState";
 import { isHttpUrl } from "@/lib/urls";
+import { adminPath } from "@/lib/adminPath";
 
 function slugify(value: string) {
   return value
@@ -27,7 +28,7 @@ function slugify(value: string) {
 
 export async function saveProduct(formData: FormData) {
   const user = await requireUser();
-  if (!user) redirect("/admin/login");
+  if (!user) redirect(adminPath("login"));
 
   const id = String(formData.get("id") ?? "");
   const title = String(formData.get("title") ?? "").trim();
@@ -113,12 +114,12 @@ export async function saveProduct(formData: FormData) {
   revalidatePath(`/p/${slug}`);
   revalidatePath("/admin/products");
   revalidatePath("/sitemap.xml");
-  redirect("/admin/products");
+  redirect(adminPath("products"));
 }
 
 export async function deleteProduct(formData: FormData) {
   const user = await requireAdmin();
-  if (!user) redirect("/admin");
+  if (!user) redirect(adminPath());
   const id = String(formData.get("id") ?? "");
   // Deleting an already-deleted row threw P2025 as an unhandled 500.
   const product = id ? await prisma.product.findUnique({ where: { id } }) : null;
@@ -130,12 +131,12 @@ export async function deleteProduct(formData: FormData) {
     revalidatePath("/sitemap.xml");
   }
   revalidatePath("/admin/products");
-  redirect("/admin/products");
+  redirect(adminPath("products"));
 }
 
 export async function savePost(formData: FormData) {
   const user = await requireUser();
-  if (!user) redirect("/admin/login");
+  if (!user) redirect(adminPath("login"));
   const id = String(formData.get("id") ?? "");
   const title = String(formData.get("title") ?? "").trim();
   const slug = slugify(String(formData.get("slug") ?? "") || title);
@@ -167,12 +168,12 @@ export async function savePost(formData: FormData) {
   revalidatePath(`/blog/${slug}`);
   revalidatePath("/sitemap.xml");
   revalidatePath("/admin/posts");
-  redirect("/admin/posts");
+  redirect(adminPath("posts"));
 }
 
 export async function deletePost(formData: FormData) {
   const user = await requireAdmin();
-  if (!user) redirect("/admin");
+  if (!user) redirect(adminPath());
   const id = String(formData.get("id") ?? "");
   const post = await prisma.post.findUnique({ where: { id } });
   if (post) {
@@ -182,12 +183,12 @@ export async function deletePost(formData: FormData) {
     revalidatePath("/sitemap.xml");
   }
   revalidatePath("/admin/posts");
-  redirect("/admin/posts");
+  redirect(adminPath("posts"));
 }
 
 export async function saveSettings(formData: FormData) {
   const user = await requireAdmin();
-  if (!user) redirect("/admin");
+  if (!user) redirect(adminPath());
   await setSettings({
     siteName: String(formData.get("siteName") ?? SITE_NAME),
     tagline: String(formData.get("tagline") ?? ""),
@@ -215,12 +216,12 @@ export async function saveSettings(formData: FormData) {
   revalidatePath("/legal/privacy");
   revalidatePath("/legal/terms");
   revalidatePath("/legal/cookies");
-  redirect("/admin/settings");
+  redirect(adminPath("settings"));
 }
 
 export async function saveRedirect(formData: FormData) {
   const user = await requireAdmin();
-  if (!user) redirect("/admin");
+  if (!user) redirect(adminPath());
   const fromPath = String(formData.get("fromPath") ?? "").trim();
   const toPath = String(formData.get("toPath") ?? "").trim();
   if (!fromPath || !toPath) throw new Error("Both paths required");
@@ -234,7 +235,7 @@ export async function saveRedirect(formData: FormData) {
     update: { toPath },
     create: { fromPath, toPath },
   });
-  redirect("/admin/redirects");
+  redirect(adminPath("redirects"));
 }
 
 export type PasswordState = { error?: string; ok?: boolean };
@@ -251,7 +252,7 @@ export async function changePassword(
   formData: FormData,
 ): Promise<PasswordState> {
   const user = await requireUser();
-  if (!user) redirect("/admin/login");
+  if (!user) redirect(adminPath("login"));
 
   const current = String(formData.get("currentPassword") ?? "");
   const next = String(formData.get("newPassword") ?? "");
@@ -266,7 +267,7 @@ export async function changePassword(
   if (next === current) return { error: "The new password must be different." };
 
   const record = await prisma.user.findUnique({ where: { id: user.id } });
-  if (!record) redirect("/admin/login");
+  if (!record) redirect(adminPath("login"));
   if (!(await verifyPassword(current, record.passwordHash))) {
     return { error: "That is not your current password." };
   }
@@ -287,7 +288,7 @@ export async function changePassword(
 // always equalled the total message count.
 export async function markMessageRead(formData: FormData) {
   const user = await requireAdmin();
-  if (!user) redirect("/admin");
+  if (!user) redirect(adminPath());
   const id = String(formData.get("id") ?? "");
   if (id) {
     const message = await prisma.message.findUnique({ where: { id } });
@@ -295,24 +296,24 @@ export async function markMessageRead(formData: FormData) {
   }
   revalidatePath("/admin/messages");
   revalidatePath("/admin");
-  redirect("/admin/messages");
+  redirect(adminPath("messages"));
 }
 
 export async function deleteMessage(formData: FormData) {
   const user = await requireAdmin();
-  if (!user) redirect("/admin");
+  if (!user) redirect(adminPath());
   const id = String(formData.get("id") ?? "");
   if (id) {
     await prisma.message.deleteMany({ where: { id } });
   }
   revalidatePath("/admin/messages");
   revalidatePath("/admin");
-  redirect("/admin/messages");
+  redirect(adminPath("messages"));
 }
 
 export async function saveCategory(formData: FormData) {
   const user = await requireAdmin();
-  if (!user) redirect("/admin");
+  if (!user) redirect(adminPath());
   const name = String(formData.get("name") ?? "").trim();
   const slug = slugify(String(formData.get("slug") ?? "") || name);
   // slugify strips everything non-alphanumeric, so a name like "!!!" yields ""
@@ -324,5 +325,5 @@ export async function saveCategory(formData: FormData) {
     update: { name, description },
     create: { name, slug, description },
   });
-  redirect("/admin/categories");
+  redirect(adminPath("categories"));
 }

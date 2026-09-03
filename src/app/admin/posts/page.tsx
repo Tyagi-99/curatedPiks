@@ -1,17 +1,18 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { adminPath } from "@/lib/adminPath";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export default async function PostsAdminPage() {
   const user = await getSession();
-  if (!user) redirect("/admin/login");
+  if (!user) redirect(adminPath("login"));
   const posts = await prisma.post.findMany({ orderBy: { updatedAt: "desc" } });
   return (
     <div>
       <div className="flex items-center justify-between">
         <h1 className="font-serif text-3xl">Blog</h1>
-        <Link href="/admin/posts/new" className="rounded-full bg-gray-900 px-4 py-2 text-sm text-white">
+        <Link href={adminPath("posts/new")} className="rounded-full bg-cta px-4 py-2 text-sm font-semibold text-cta-ink">
           New post
         </Link>
       </div>
@@ -39,7 +40,7 @@ export default async function PostsAdminPage() {
                   Preview
                 </Link>
               )}
-              <Link href={`/admin/posts/${post.id}`} className="text-accent">
+              <Link href={adminPath(`posts/${post.id}`)} className="font-medium">
                 Edit
               </Link>
             </div>

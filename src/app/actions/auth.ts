@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { clearSession, login } from "@/lib/auth";
+import { adminPath } from "@/lib/adminPath";
 import { rateLimit } from "@/lib/rateLimit";
 import { clientIp } from "@/lib/requestIp";
 
@@ -20,17 +21,17 @@ export async function loginAction(formData: FormData) {
   if (!ok) {
     // Deliberately the same shape as a wrong password, so probing cannot tell
     // a locked-out account from a bad credential.
-    redirect("/admin/login?error=throttled");
+    redirect(`${adminPath("login")}?error=throttled`);
   }
 
   const user = await login(email, password);
   if (!user) {
-    redirect("/admin/login?error=1");
+    redirect(`${adminPath("login")}?error=1`);
   }
-  redirect("/admin");
+  redirect(adminPath());
 }
 
 export async function logoutAction() {
   await clearSession();
-  redirect("/admin/login");
+  redirect(adminPath("login"));
 }

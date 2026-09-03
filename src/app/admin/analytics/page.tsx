@@ -1,10 +1,11 @@
 import { redirect } from "next/navigation";
+import { adminPath } from "@/lib/adminPath";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export default async function AnalyticsPage() {
   const user = await getSession();
-  if (!user) redirect("/admin/login");
+  if (!user) redirect(adminPath("login"));
   const [byProduct, bySource, byMerchant] = await Promise.all([
     prisma.click.groupBy({
       by: ["productId"],
@@ -30,8 +31,9 @@ export default async function AnalyticsPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="font-serif text-3xl">Buy clicks</h1>
-      <section className="rounded-2xl bg-surface p-4">
+      <h1 className="font-display text-3xl">Buy clicks</h1>
+      <p className="mt-1 text-sm text-muted">Real outbound clicks recorded by /go/. Empty until someone uses a buy button.</p>
+      <section className="rounded-xl border border-line bg-surface p-4">
         <h2 className="font-medium">By source</h2>
         <ul className="mt-3 space-y-1 text-sm">
           {bySource.map((row) => (

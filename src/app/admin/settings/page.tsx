@@ -2,12 +2,13 @@ import { saveSettings } from "@/app/actions/admin";
 import { PasswordForm } from "@/components/admin/PasswordForm";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
+import { adminPath } from "@/lib/adminPath";
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
 export default async function SettingsPage() {
   const user = await getSession();
-  if (!user) redirect("/admin/login");
+  if (!user) redirect(adminPath("login"));
 
   // Anyone signed in can rotate their own password; only admins see the rest.
   if (user.role !== "ADMIN") {

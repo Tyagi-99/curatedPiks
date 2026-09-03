@@ -1,12 +1,13 @@
 import { notFound, redirect } from "next/navigation";
 import { deletePost, savePost } from "@/app/actions/admin";
 import { PostEditor } from "@/components/admin/PostEditor";
+import { adminPath } from "@/lib/adminPath";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export default async function EditPostPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await getSession();
-  if (!user) redirect("/admin/login");
+  if (!user) redirect(adminPath("login"));
   const { id } = await params;
   const post = await prisma.post.findUnique({ where: { id } });
   if (!post) notFound();

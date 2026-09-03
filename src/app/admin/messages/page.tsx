@@ -1,21 +1,23 @@
 import { redirect } from "next/navigation";
 import { deleteMessage, markMessageRead } from "@/app/actions/admin";
+import { adminPath } from "@/lib/adminPath";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export default async function MessagesPage() {
   const user = await getSession();
-  if (!user) redirect("/admin/login");
+  if (!user) redirect(adminPath("login"));
   if (user.role !== "ADMIN") {
     return <p>Only an admin can read contact messages.</p>;
   }
   const messages = await prisma.message.findMany({ orderBy: { createdAt: "desc" } });
   return (
     <div>
-      <h1 className="font-serif text-3xl">Inbox</h1>
+      <h1 className="font-display text-3xl">Inbox</h1>
+      <p className="mt-1 text-sm text-muted">{messages.filter((m) => !m.read).length} unread · {messages.length} total</p>
       <ul className="mt-6 space-y-3">
         {messages.map((message) => (
-          <li key={message.id} className="rounded-2xl bg-surface p-4">
+          <li key={message.id} className="rounded-xl border border-line bg-surface p-4">
             <div className="text-sm font-medium">
               {message.name} · {message.email} · {message.subject}
               {message.read ? null : <span className="ml-2 text-xs text-danger">Unread</span>}

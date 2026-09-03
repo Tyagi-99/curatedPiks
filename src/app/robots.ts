@@ -8,7 +8,7 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       // /go/* are affiliate redirects: crawling them wastes budget and files a
       // click row per crawl. /api/* has nothing indexable.
-      disallow: ["/admin", "/api/", "/go/"],
+      disallow: ["/api/", "/go/"],
     },
     sitemap: `${siteUrl()}/sitemap.xml`,
   };

@@ -1,39 +1,47 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { jwtVerify } from "jose";
+import { adminBasePath, isPublicAdminProbe, isSecretAdminPath, toInternalAdminPath } from "@/lib/adminPath";
 
 /**
- * First gate for /admin. Renamed from `middleware.ts`, which is deprecated in
- * Next 16.
- *
- * This only proves the cookie's signature. It deliberately does not check the
- * user still exists or what role they hold, because proxy code may run on a CDN
- * edge with no database access. `getSession()` performs the authoritative check
- * (user exists, role, password-change cutoff) and every admin page calls it.
+ * Cookie signature gate for the CMS. Role and existence checks stay in getSession().
  */
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  if (!pathname.startsWith("/admin")) return NextResponse.next();
-  if (pathname === "/admin/login") return NextResponse.next();
+
+  if (isPublicAdminProbe(pathname)) {
+    return new NextResponse("Not Found", {
+      status: 404,
+      headers: { "content-type": "text/plain; charset=utf-8" },
+    });
+  }
+
+  if (!isSecretAdminPath(pathname)) return NextResponse.next();
+
+  const internal = request.nextUrl.clone();
+  internal.pathname = toInternalAdminPath(pathname);
 
   const loginUrl = request.nextUrl.clone();
-  loginUrl.pathname = "/admin/login";
+  loginUrl.pathname = `${adminBasePath()}/login`;
   loginUrl.search = "";
+
+  if (internal.pathname === "/admin/login") {
+    return NextResponse.rewrite(internal);
+  }
 
   const token = request.cookies.get("cp_session")?.value;
   const secret = process.env.AUTH_SECRET;
-  // Fail closed if the secret is missing or still the placeholder.
   if (!token || !secret || secret.includes("change-this")) {
     return NextResponse.redirect(loginUrl);
   }
 
   try {
     await jwtVerify(token, new TextEncoder().encode(secret));
-    return NextResponse.next();
+    return NextResponse.rewrite(internal);
   } catch {
     return NextResponse.redirect(loginUrl);
   }
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin", "/admin/:path*", "/x7Kp9mQ2vL4rT8nW", "/x7Kp9mQ2vL4rT8nW/:path*"],
 };

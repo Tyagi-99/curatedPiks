@@ -1,21 +1,22 @@
 import { redirect } from "next/navigation";
 import { saveCategory } from "@/app/actions/admin";
+import { adminPath } from "@/lib/adminPath";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export default async function CategoriesPage() {
   const user = await getSession();
-  if (!user) redirect("/admin/login");
+  if (!user) redirect(adminPath("login"));
   const categories = await prisma.category.findMany({
     include: { _count: { select: { products: true } } },
     orderBy: { name: "asc" },
   });
   return (
     <div className="max-w-xl">
-      <h1 className="font-serif text-3xl">Categories</h1>
+      <h1 className="font-display text-3xl">Categories</h1>
       <ul className="mt-4 space-y-2">
         {categories.map((category) => (
-          <li key={category.id} className="rounded-xl bg-surface p-3 text-sm">
+          <li key={category.id} className="rounded-xl border border-line bg-surface p-3 text-sm">
             {category.name} · {category._count.products} products · /c/{category.slug}
           </li>
         ))}

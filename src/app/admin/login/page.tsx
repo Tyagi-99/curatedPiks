@@ -9,12 +9,12 @@ export default async function LoginPage({
   const { error } = await searchParams;
   return (
     <div className="grid min-h-screen place-items-center bg-bg px-4">
-      <form action={loginAction} className="relative w-full max-w-sm space-y-4 rounded-2xl bg-surface p-8 shadow">
+      <form action={loginAction} className="relative w-full max-w-sm space-y-4 rounded-2xl border border-line bg-surface p-8">
         <div className="absolute right-4 top-4">
           <ThemeToggle />
         </div>
-        <h1 className="font-serif text-3xl">Admin</h1>
-        <p className="text-sm text-muted">Sign in to publish products and copy Instagram reply links.</p>
+        <h1 className="font-display text-3xl">Sign in</h1>
+        <p className="text-sm text-muted">DealDuniya editorial CMS</p>
         {error ? (
           <p role="alert" className="text-sm text-danger">
             {error === "throttled"
@@ -42,7 +42,7 @@ export default async function LoginPage({
             className="mt-1 w-full rounded-xl border border-line px-3 py-2"
           />
         </label>
-        <button type="submit" className="w-full rounded-full bg-gray-900 py-2.5 font-medium text-white">
+        <button type="submit" className="w-full rounded-full bg-cta py-2.5 font-semibold text-cta-ink">
           Sign in
         </button>
       </form>

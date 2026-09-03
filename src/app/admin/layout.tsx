@@ -1,63 +1,57 @@
-import Link from "next/link";
-import { logoutAction } from "@/app/actions/auth";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import type { Metadata } from "next";
+import { AdminShell } from "@/components/admin/AdminShell";
 import { getSession } from "@/lib/auth";
+import { adminPath } from "@/lib/adminPath";
+import { prisma } from "@/lib/prisma";
 
-const nav = [
-  { href: "/admin", label: "Dashboard" },
-  { href: "/admin/products", label: "Products" },
-  { href: "/admin/categories", label: "Categories" },
-  { href: "/admin/posts", label: "Blog" },
-  { href: "/admin/analytics", label: "Clicks" },
-  { href: "/admin/messages", label: "Inbox", adminOnly: true },
-  { href: "/admin/subscribers", label: "Newsletter", adminOnly: true },
-  { href: "/admin/redirects", label: "Redirects", adminOnly: true },
-  // Not admin-only: editors need it to change their own password.
-  { href: "/admin/settings", label: "Settings" },
-];
+export const metadata: Metadata = {
+  title: { default: "CMS", template: "%s · CMS" },
+  robots: { index: false, follow: false },
+};
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await getSession();
   if (!user) return <>{children}</>;
 
+  const unread = user.role === "ADMIN" ? await prisma.message.count({ where: { read: false } }) : 0;
+  const groups = [
+    { heading: "Overview", items: [{ href: adminPath(), label: "Dashboard" }] },
+    {
+      heading: "Content",
+      items: [
+        { href: adminPath("products"), label: "Products" },
+        { href: adminPath("categories"), label: "Categories" },
+        { href: adminPath("posts"), label: "Blog" },
+      ],
+    },
+    {
+      heading: "Commerce",
+      items: [
+        { href: adminPath("analytics"), label: "Clicks" },
+        ...(user.role === "ADMIN" ? [{ href: adminPath("redirects"), label: "Redirects" }] : []),
+      ],
+    },
+    {
+      heading: "Communication",
+      items: user.role === "ADMIN"
+        ? [
+            { href: adminPath("messages"), label: "Inbox", badge: unread || undefined },
+            { href: adminPath("subscribers"), label: "Newsletter" },
+          ]
+        : [],
+    },
+    { heading: "System", items: [{ href: adminPath("settings"), label: "Settings" }] },
+  ].filter((group) => group.items.length > 0);
+
   return (
-    <div className="flex min-h-screen bg-bg">
-      <aside className="hidden w-56 shrink-0 border-r border-line bg-surface p-4 md:block">
-        <div className="flex items-center justify-between gap-2">
-          <div className="font-serif text-xl">DealDuniya</div>
-          <ThemeToggle />
-        </div>
-        <p className="mt-1 text-xs text-faint">{user.role}</p>
-        <nav className="mt-6 space-y-1 text-sm">
-          {nav
-            .filter((item) => !item.adminOnly || user.role === "ADMIN")
-            .map((item) => (
-              <Link key={item.href} href={item.href} className="block rounded-lg px-2 py-1.5 hover:bg-bg">
-                {item.label}
-              </Link>
-            ))}
-        </nav>
-        <form action={logoutAction} className="mt-8">
-          <button type="submit" className="text-sm text-muted hover:text-text">
-            Log out
-          </button>
-        </form>
-        <Link href="/" className="mt-4 block text-sm text-accent">
-          View site
-        </Link>
-      </aside>
-      <div className="flex-1">
-        <div className="flex items-center justify-between border-b border-line bg-surface px-4 py-3 md:hidden">
-          <span className="font-serif">Admin</span>
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <Link href="/admin/products" className="text-sm">
-              Products
-            </Link>
-          </div>
-        </div>
-        <div className="p-4 md:p-8">{children}</div>
-      </div>
-    </div>
+    <AdminShell
+      email={user.email}
+      role={user.role}
+      groups={groups}
+      viewSiteHref="/"
+      dashboardHref={adminPath()}
+    >
+      {children}
+    </AdminShell>
   );
 }
