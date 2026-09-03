@@ -25,12 +25,9 @@ if (onVercel) {
     );
     process.exit(1);
   }
-  if (!process.env.ADMIN_PASSWORD) {
-    console.error(
-      "ADMIN_PASSWORD must be set so the first admin is not created with a documented default password.",
-    );
-    process.exit(1);
-  }
+  // ADMIN_PASSWORD is not a build-time requirement. The seed creates the first
+  // admin only when none exists; if the Neon database already has an admin,
+  // a missing password must not block the production deploy.
 } else {
   process.env.DATABASE_URL ||= "postgresql://curated:curated@127.0.0.1:5433/curatedpicks";
   process.env.AUTH_SECRET ||= "curatedpicks-local-dev-only-auth-secret-32b";

@@ -41,7 +41,7 @@ Required env vars in production — the build fails fast if any are missing:
 | `DATABASE_URL` | Neon Postgres, `sslmode=require` |
 | `AUTH_SECRET` | Signs session cookies. 32+ random chars (`openssl rand -base64 32`) |
 | `NEXT_PUBLIC_SITE_URL` | Canonical URLs, sitemap, and JSON-LD are built from this |
-| `ADMIN_PASSWORD` | Password for the first admin. Only used when the account does not exist yet |
+| `ADMIN_PASSWORD` | Optional after the first admin exists. Required only to create the first admin account |
 
 The seed is **create-if-missing**: it never overwrites products, legal pages,
 settings, or the admin password, because it runs on every deploy. To refresh the

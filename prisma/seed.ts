@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { resolveAdminSeed } from "../src/lib/adminSeed";
 import { LEGAL_PAGES } from "../src/lib/legalPages";
 import { EDITORIAL_BY_SLUG } from "./editorialSeed";
 
@@ -22,16 +23,24 @@ const OVERWRITE_DEMO = process.env.SEED_OVERWRITE_DEMO === "1";
 export async function seedDatabase(prisma: PrismaClient) {
   const email = (process.env.ADMIN_EMAIL ?? "admin@curatedpicks.local").toLowerCase();
   const existingAdmin = await prisma.user.findUnique({ where: { email } });
+  const anyAdmin = existingAdmin ?? (await prisma.user.findFirst({ where: { role: "ADMIN" } }));
+  const password = process.env.ADMIN_PASSWORD;
+  const production = process.env.NODE_ENV === "production" || Boolean(process.env.VERCEL);
+  const action = resolveAdminSeed({
+    existingTargetEmail: Boolean(existingAdmin),
+    anyAdminExists: Boolean(anyAdmin),
+    hasPassword: Boolean(password),
+    production,
+  });
 
-  if (!existingAdmin) {
-    // Only ever set a password when creating the account for the first time.
-    const password = process.env.ADMIN_PASSWORD;
+  if (action === "error") {
+    throw new Error(
+      "ADMIN_PASSWORD must be set to create the first admin user in production.",
+    );
+  }
+
+  if (action === "create") {
     if (!password) {
-      if (process.env.NODE_ENV === "production" || process.env.VERCEL) {
-        throw new Error(
-          "ADMIN_PASSWORD must be set to create the first admin user in production.",
-        );
-      }
       console.warn("ADMIN_PASSWORD not set — creating the local dev admin with the default password.");
     }
     const passwordHash = await bcrypt.hash(password ?? "ChangeMe123!", 12);
