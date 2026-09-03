@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Instrument_Serif, Manrope } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { siteUrl } from "@/lib/env";
 import { getSettings } from "@/lib/settings";
 import "./globals.css";
@@ -92,7 +93,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           }}
         />
       </head>
-      <body className="flex min-h-full flex-col bg-bg text-text">{children}</body>
+      <body className="flex min-h-full flex-col bg-bg text-text">
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
