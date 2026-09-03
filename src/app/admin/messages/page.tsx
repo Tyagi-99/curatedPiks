@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { markMessageRead } from "@/app/actions/admin";
+import { deleteMessage, markMessageRead } from "@/app/actions/admin";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -23,14 +23,22 @@ export default async function MessagesPage() {
             <p className="mt-2 whitespace-pre-wrap text-sm text-muted">{message.body}</p>
             <div className="mt-2 flex items-center justify-between gap-3">
               <p className="text-xs text-faint">{message.createdAt.toLocaleString("en-IN")}</p>
-              {message.read ? null : (
-                <form action={markMessageRead}>
+              <div className="flex items-center gap-3">
+                {message.read ? null : (
+                  <form action={markMessageRead}>
+                    <input type="hidden" name="id" value={message.id} />
+                    <button type="submit" className="text-xs text-accent">
+                      Mark read
+                    </button>
+                  </form>
+                )}
+                <form action={deleteMessage}>
                   <input type="hidden" name="id" value={message.id} />
-                  <button type="submit" className="text-xs text-accent">
-                    Mark read
+                  <button type="submit" className="text-xs text-danger">
+                    Delete
                   </button>
                 </form>
-              )}
+              </div>
             </div>
           </li>
         ))}

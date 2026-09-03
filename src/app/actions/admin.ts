@@ -298,6 +298,18 @@ export async function markMessageRead(formData: FormData) {
   redirect("/admin/messages");
 }
 
+export async function deleteMessage(formData: FormData) {
+  const user = await requireAdmin();
+  if (!user) redirect("/admin");
+  const id = String(formData.get("id") ?? "");
+  if (id) {
+    await prisma.message.deleteMany({ where: { id } });
+  }
+  revalidatePath("/admin/messages");
+  revalidatePath("/admin");
+  redirect("/admin/messages");
+}
+
 export async function saveCategory(formData: FormData) {
   const user = await requireAdmin();
   if (!user) redirect("/admin");

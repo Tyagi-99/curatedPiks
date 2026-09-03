@@ -34,12 +34,18 @@ export function ContactForm() {
   const values = state.values;
 
   return (
-    <form action={formAction} className="mt-10 space-y-4" noValidate>
+    <form action={formAction} className="relative mt-10 space-y-4" noValidate>
       {errors.form ? (
         <p role="alert" className="text-sm text-danger">
           {errors.form}
         </p>
       ) : null}
+      <div className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden="true">
+        <label>
+          Company
+          <input type="text" name="company" tabIndex={-1} autoComplete="off" />
+        </label>
+      </div>
       <label className="block text-sm font-medium">
         Name
         <input

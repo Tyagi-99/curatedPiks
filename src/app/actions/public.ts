@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { contactSpamReason, isHoneypotTriggered } from "@/lib/contactGuard";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rateLimit";
 import { clientIp } from "@/lib/requestIp";
@@ -37,6 +38,12 @@ export async function submitContact(
   _prevState: ContactState,
   formData: FormData,
 ): Promise<ContactState> {
+  // Hidden field: humans leave it empty. Bots that fill every input are dropped
+  // with a fake success so they do not retry.
+  if (isHoneypotTriggered(String(formData.get("company") ?? ""))) {
+    redirect("/contact/thanks");
+  }
+
   // Five messages per 10 minutes per IP. The form previously accepted unlimited
   // submissions, so it was a free write endpoint for spam.
   const ip = await clientIp();
@@ -68,6 +75,21 @@ export async function submitContact(
       }
     }
     return { errors, values };
+  }
+
+  const emailKey = parsed.data.email.toLowerCase();
+  if (!rateLimit(`contact-email:${emailKey}`, 3, 10 * 60 * 1000).ok) {
+    return {
+      errors: { form: "Too many messages from this email just now. Please try again later." },
+      values,
+    };
+  }
+
+  if (contactSpamReason(parsed.data)) {
+    return {
+      errors: { form: "Please send a plain-text message without HTML or shortened links." },
+      values,
+    };
   }
 
   try {
